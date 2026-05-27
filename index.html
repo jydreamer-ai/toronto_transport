@@ -10,174 +10,127 @@
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: #f4f6f8;
-            color: #1a202c;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f8f9fa;
+            color: #202124;
             height: 100vh;
             overflow: hidden;
             display: flex;
             flex-direction: column;
         }
 
-        /* ─── Header ─── */
+        /* ─── Google Maps Style Header ─── */
         .header {
-            background: #fff;
-            border-bottom: 1px solid #e2e8f0;
-            padding: 0 20px;
-            height: 58px;
+            background: #ffffff;
+            border-bottom: 1px solid #dadce0;
+            padding: 0 24px;
+            height: 64px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-shrink: 0;
             z-index: 1001;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.1), 0 2px 6px 2px rgba(60,64,67,0.15);
         }
-        .brand { display: flex; align-items: center; gap: 12px; }
+        .brand { display: flex; align-items: center; gap: 14px; }
         .brand-logo {
             background: #da291c;
             color: white;
             font-weight: 800;
-            font-size: 13px;
+            font-size: 14px;
             letter-spacing: 0.5px;
-            border-radius: 8px;
-            width: 42px;
-            height: 34px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border-radius: 6px;
+            padding: 6px 12px;
+            display: flex; align-items: center; justify-content: center;
         }
-        .brand-title { font-size: 17px; font-weight: 700; color: #1a202c; line-height: 1.1; }
-        .brand-sub { font-size: 11px; color: #718096; }
+        .brand-title { font-size: 18px; font-weight: 500; color: #202124; letter-spacing: -0.2px; }
+        .brand-sub { font-size: 12px; color: #5f6368; margin-top: 2px; }
         .header-right { display: flex; align-items: center; gap: 16px; }
         .live-dot {
             display: flex; align-items: center; gap: 6px;
-            font-size: 12px; color: #38a169; font-weight: 500;
+            font-size: 13px; color: #137333; font-weight: 500;
+            background: #e6f4ea; padding: 4px 12px; border-radius: 16px;
         }
         .pulse {
-            width: 8px; height: 8px; background: #38a169; border-radius: 50%;
+            width: 8px; height: 8px; background: #137333; border-radius: 50%;
             animation: pulse 1.8s infinite;
         }
         @keyframes pulse {
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.4; transform: scale(1.4); }
         }
-        .source-link {
-            font-size: 11px; color: #a0aec0; text-decoration: none;
-        }
-        .source-link:hover { color: #4a5568; }
 
-        /* ─── Body ─── */
+        /* ─── App Body Layout ─── */
         .body-wrap {
             display: flex;
             flex: 1;
             overflow: hidden;
-        }
-
-        /* ─── Map ─── */
-        #map-wrap {
-            flex: 1;
             position: relative;
-            overflow: hidden;
         }
-        #map { width: 100%; height: 100%; cursor: crosshair; }
-
-        .map-hint {
-            position: absolute;
-            bottom: 24px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(4px);
-            border: 1px solid #e2e8f0;
-            padding: 10px 18px;
-            border-radius: 28px;
-            font-size: 13px;
-            color: #4a5568;
-            z-index: 500;
-            pointer-events: none;
-            white-space: nowrap;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-            transition: opacity 0.4s;
-        }
-        .map-hint.hidden { opacity: 0; }
-
-        .legend {
-            position: absolute;
-            bottom: 28px;
-            right: 12px;
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 8px 12px;
-            font-size: 11px;
-            color: #718096;
-            z-index: 500;
-            line-height: 1.8;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-        }
-        .legend-row { display: flex; align-items: center; gap: 6px; }
-        .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 
         /* ─── Sidebar ─── */
         .sidebar {
-            width: 380px;
-            background: #f7fafc;
-            border-left: 1px solid #e2e8f0;
+            width: 400px;
+            background: #ffffff;
+            border-right: 1px solid #dadce0;
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            z-index: 1000;
+            box-shadow: 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12);
         }
 
         .sidebar-head {
-            padding: 14px 18px 12px;
-            background: white;
-            border-bottom: 1px solid #edf2f7;
+            padding: 16px 20px;
+            background: #ffffff;
+            border-bottom: 1px solid #dadce0;
             flex-shrink: 0;
         }
         .sidebar-head-top {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
         }
-        .sidebar-title { font-size: 14px; font-weight: 700; color: #2d3748; }
+        .sidebar-title { font-size: 16px; font-weight: 500; color: #202124; }
         .refresh-btn {
-            background: #ebf8ff;
-            color: #2b6cb0;
-            border: 1px solid #bee3f8;
-            border-radius: 6px;
-            padding: 4px 10px;
-            font-size: 11px;
-            font-weight: 600;
+            background: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: 500;
             cursor: pointer;
             display: none;
-            transition: background 0.15s;
+            box-shadow: 0 1px 2px 0 rgba(66,133,244,0.3), 0 1px 3px 1px rgba(66,133,244,0.15);
+            transition: background 0.15s, box-shadow 0.15s;
         }
-        .refresh-btn:hover { background: #bee3f8; }
-        .sidebar-sub { font-size: 12px; color: #a0aec0; }
+        .refresh-btn:hover { background: #1557b0; box-shadow: 0 2px 4px 0 rgba(66,133,244,0.4); }
+        .sidebar-sub { font-size: 13px; color: #5f6368; }
 
         .loc-bar {
-            padding: 8px 18px;
-            background: #ebf8ff;
-            border-bottom: 1px solid #bee3f8;
+            padding: 10px 20px;
+            background: #e8f0fe;
+            border-bottom: 1px solid #d2e3fc;
             display: none;
             align-items: center;
-            gap: 6px;
-            font-size: 12px;
-            color: #2c5282;
+            gap: 8px;
+            font-size: 13px;
+            color: #1967d2;
         }
-        .loc-bar span { font-weight: 500; }
 
         .sidebar-body {
             flex: 1;
             overflow-y: auto;
-            padding: 12px;
+            padding: 16px;
+            background: #f8f9fa;
         }
-        .sidebar-body::-webkit-scrollbar { width: 4px; }
+        .sidebar-body::-webkit-scrollbar { width: 6px; }
         .sidebar-body::-webkit-scrollbar-track { background: transparent; }
-        .sidebar-body::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; }
+        .sidebar-body::-webkit-scrollbar-thumb { background: #dadce0; border-radius: 4px; }
 
-        /* ─── Welcome ─── */
+        /* ─── Welcome Map State ─── */
         .welcome {
             height: 100%;
             display: flex;
@@ -185,173 +138,194 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 32px;
+            padding: 24px;
             gap: 12px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #dadce0;
         }
         .welcome-ico {
-            width: 64px; height: 64px;
-            background: linear-gradient(135deg, #fff5f5, #fed7d7);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 28px;
+            font-size: 36px;
             margin-bottom: 4px;
         }
-        .welcome h3 { font-size: 16px; font-weight: 700; color: #2d3748; }
-        .welcome p { font-size: 13px; color: #718096; line-height: 1.7; max-width: 260px; }
+        .welcome h3 { font-size: 18px; font-weight: 500; color: #202124; }
+        .welcome p { font-size: 13px; color: #5f6368; line-height: 1.6; max-width: 280px; }
         .welcome-steps {
             text-align: left;
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 14px 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px 16px;
             width: 100%;
-            margin-top: 8px;
+            margin-top: 12px;
         }
         .step {
-            display: flex; align-items: flex-start; gap: 10px;
-            font-size: 12px; color: #4a5568; line-height: 1.5;
-            padding: 5px 0;
+            display: flex; align-items: center; gap: 12px;
+            font-size: 13px; color: #3c4043;
+            padding: 6px 0;
         }
         .step-num {
-            background: #da291c; color: white;
-            width: 18px; height: 18px; border-radius: 50%;
-            font-size: 10px; font-weight: 700;
+            background: #1a73e8; color: white;
+            width: 20px; height: 20px; border-radius: 50%;
+            font-size: 11px; font-weight: bold;
             display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0; margin-top: 1px;
+            flex-shrink: 0;
         }
 
-        /* ─── Loading ─── */
+        /* ─── Loading / Spinners ─── */
         .loading {
             display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 48px 0;
-            gap: 14px;
+            gap: 16px;
         }
         .spinner {
-            width: 36px; height: 36px;
-            border: 3px solid #e2e8f0;
-            border-top-color: #da291c;
+            width: 32px; height: 32px;
+            border: 3px solid #e8eaed;
+            border-top-color: #1a73e8;
             border-radius: 50%;
-            animation: spin 0.7s linear infinite;
+            animation: spin 0.8s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .loading p { font-size: 13px; color: #718096; }
+        .loading p { font-size: 13px; color: #5f6368; }
 
-        /* ─── Stop Cards ─── */
-        .stops-list { display: none; flex-direction: column; }
+        /* ─── Stop Result Cards ─── */
+        .stops-list { display: none; flex-direction: column; gap: 12px; }
         .stop-card {
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            margin-bottom: 10px;
+            background: #ffffff;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-            transition: box-shadow 0.2s, transform 0.2s;
+            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3);
+            transition: box-shadow 0.2s;
         }
         .stop-card:hover {
-            box-shadow: 0 4px 16px rgba(0,0,0,0.09);
-            transform: translateY(-1px);
+            box-shadow: 0 1px 3px 0 rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15);
         }
         .stop-head {
-            display: flex; align-items: center; gap: 10px;
-            padding: 10px 14px;
-            background: #f8fafc;
-            border-bottom: 1px solid #edf2f7;
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px;
+            background: #ffffff;
+            border-bottom: 1px solid #e8eaed;
         }
         .stop-ico {
-            width: 30px; height: 30px;
-            background: #da291c;
-            border-radius: 7px;
+            width: 32px; height: 32px;
+            background: #e8f0fe;
+            color: #1a73e8;
+            border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-size: 14px;
+            font-size: 16px;
             flex-shrink: 0;
         }
-        .stop-name { font-size: 12px; font-weight: 700; color: #2d3748; line-height: 1.3; }
-        .stop-dist { font-size: 11px; color: #a0aec0; margin-top: 2px; }
+        .stop-name { font-size: 14px; font-weight: 500; color: #202124; line-height: 1.3; }
+        .stop-dist { font-size: 12px; color: #5f6368; margin-top: 2px; }
 
-        .routes-wrap { padding: 4px 0; }
+        .routes-wrap { padding: 4px 0; background: #ffffff; }
         .route-row {
-            display: flex; align-items: center; gap: 10px;
-            padding: 8px 14px;
-            border-bottom: 1px solid #f7fafc;
-            transition: background 0.12s;
+            display: flex; align-items: center; gap: 14px;
+            padding: 10px 16px;
+            border-bottom: 1px solid #f1f3f4;
         }
         .route-row:last-child { border-bottom: none; }
-        .route-row:hover { background: #fafafa; }
-
+        
         .route-num {
-            min-width: 44px; padding: 4px 6px;
-            border-radius: 5px;
-            font-size: 11px; font-weight: 800;
+            min-width: 48px; padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px; font-weight: 700;
             text-align: center;
-            background: #1a365d; color: white;
+            background: #e8f0fe; color: #1a73e8;
         }
-        .route-num.streetcar { background: #553c9a; }
-        .route-num.express { background: #276749; }
+        .route-num.express { background: #e6f4ea; color: #137333; }
+        .route-num.streetcar { background: #f3e5f5; color: #7b1fa2; }
 
-        .route-info { flex: 1; }
-        .route-dest { font-size: 12px; font-weight: 600; color: #2d3748; }
-        .route-meta { font-size: 10px; color: #a0aec0; margin-top: 1px; }
+        .route-info { flex: 1; min-width: 0; }
+        .route-dest { font-size: 13px; font-weight: 500; color: #202124; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .route-meta { font-size: 11px; color: #70757a; margin-top: 2px; }
 
-        .eta-col { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+        .eta-col { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
         .eta-chip {
-            padding: 3px 8px;
-            border-radius: 20px;
-            font-size: 11px; font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px; font-weight: 700;
             white-space: nowrap;
         }
-        .eta-now { background: #c6f6d5; color: #22543d; }
-        .eta-soon { background: #fefcbf; color: #744210; }
-        .eta-later { background: #edf2f7; color: #4a5568; }
-        .eta-next { font-size: 10px; color: #a0aec0; }
+        .eta-now { background: #e6f4ea; color: #137333; }
+        .eta-soon { background: #fef7e0; color: #b06000; }
+        .eta-later { background: #f1f3f4; color: #3c4043; }
+        .eta-next { font-size: 11px; color: #70757a; }
 
-        /* ─── No Results ─── */
+        /* ─── Empty Search State ─── */
         .no-results {
             display: none;
             flex-direction: column;
             align-items: center;
             padding: 48px 24px;
             text-align: center;
-            gap: 10px;
+            gap: 12px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #dadce0;
         }
-        .no-results p { font-size: 13px; color: #718096; line-height: 1.6; }
+        .no-results p { font-size: 14px; color: #5f6368; line-height: 1.5; }
 
-        /* ─── Disclaimer ─── */
+        /* ─── Map Container ─── */
+        #map-wrap {
+            flex: 1;
+            position: relative;
+        }
+        #map { width: 100%; height: 100%; }
+
+        .map-hint {
+            position: absolute;
+            top: 16px;
+            left: 20px;
+            background: #ffffff;
+            border: 1px solid #dadce0;
+            padding: 12px 20px;
+            border-radius: 24px;
+            font-size: 14px;
+            color: #202124;
+            z-index: 500;
+            pointer-events: none;
+            box-shadow: 0 1px 3px 0 rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15);
+            transition: opacity 0.3s;
+        }
+        .map-hint.hidden { opacity: 0; }
+
+        .legend {
+            position: absolute;
+            bottom: 30px;
+            right: 20px;
+            background: white;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 12px;
+            color: #3c4043;
+            z-index: 500;
+            box-shadow: 0 1px 3px 0 rgba(60,64,67,0.3);
+            display: flex; flex-direction: column; gap: 6px;
+        }
+        .legend-row { display: flex; align-items: center; gap: 8px; }
+        .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+
         .disclaimer {
-            padding: 10px 16px;
-            background: #fffff0;
-            border-top: 1px solid #faf089;
-            font-size: 10.5px;
-            color: #744210;
+            padding: 12px 20px;
+            background: #fdf6e2;
+            border-top: 1px solid #fade8f;
+            font-size: 11px;
+            color: #664d03;
             line-height: 1.5;
             flex-shrink: 0;
         }
 
-        /* ─── Locate Button (custom) ─── */
-        .leaflet-locate-btn {
-            background: white;
-            border: 2px solid rgba(0,0,0,0.2);
-            border-radius: 4px;
-            width: 34px; height: 34px;
-            font-size: 16px;
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .leaflet-locate-btn:hover { background: #f5f5f5; }
-
-        /* ─── Responsive ─── */
+        /* Responsive */
         @media (max-width: 768px) {
-            .body-wrap { flex-direction: column; }
-            #map-wrap { height: 52vh; }
-            .sidebar { width: 100%; border-left: none; border-top: 1px solid #e2e8f0; }
-            .header-right .source-link { display: none; }
-        }
-        @media (max-width: 420px) {
-            .brand-title { font-size: 15px; }
-            .sidebar { height: 48vh; }
-            #map-wrap { height: 40vh; }
+            .body-wrap { flex-direction: column-reverse; }
+            .sidebar { width: 100%; height: 45vh; border-right: none; border-top: 1px solid #dadce0; }
+            #map-wrap { height: 55vh; }
+            .map-hint { left: 50%; transform: translateX(-50%); width: calc(100% - 40px); text-align: center; }
         }
     </style>
 </head>
@@ -362,35 +336,23 @@
         <div class="brand-logo">TTC</div>
         <div>
             <div class="brand-title">Transit Tracker</div>
-            <div class="brand-sub">Real-Time Next Vehicle Arrival</div>
+            <div class="brand-sub">Toronto Bus & Streetcar Arrival Matrix</div>
         </div>
     </div>
     <div class="header-right">
-        <div class="live-dot"><div class="pulse"></div>Live</div>
-        <a href="https://open.toronto.ca/dataset/ttc-bustime-real-time-next-vehicle-arrival-nvas/"
-           target="_blank" class="source-link">City of Toronto Open Data ↗</a>
+        <div class="live-dot"><div class="pulse"></div>Live Tracker Connected</div>
     </div>
 </header>
 
 <div class="body-wrap">
 
-    <div id="map-wrap">
-        <div id="map"></div>
-        <div class="map-hint" id="mapHint">📍 Click anywhere on the map to find nearby TTC stops</div>
-        <div class="legend">
-            <div class="legend-row"><div class="legend-dot" style="background:#1a73e8;border:2px solid white;box-shadow:0 0 0 1px #1a73e8;"></div> Your location</div>
-            <div class="legend-row"><div class="legend-dot" style="background:#da291c;border-radius:3px;"></div> Transit Stop</div>
-            <div class="legend-row"><div class="legend-dot" style="background:#e8f0fe;border:1px solid #1a73e8;"></div> 800 m search radius</div>
-        </div>
-    </div>
-
     <aside class="sidebar">
         <div class="sidebar-head">
             <div class="sidebar-head-top">
-                <div class="sidebar-title">Nearby Stops & Arrivals</div>
-                <button class="refresh-btn" id="refreshBtn" onclick="refreshETAs()">↻ Refresh</button>
+                <div class="sidebar-title">Nearby Transit Hubs</div>
+                <button class="refresh-btn" id="refreshBtn" onclick="refreshETAs()">↻ Update Arrivals</button>
             </div>
-            <div class="sidebar-sub" id="sidebarSub">Click on the map to begin</div>
+            <div class="sidebar-sub" id="sidebarSub">Map focused on CF Fairview Mall</div>
         </div>
 
         <div class="loc-bar" id="locBar">
@@ -399,145 +361,99 @@
         </div>
 
         <div class="sidebar-body" id="sidebarBody">
-
             <div class="welcome" id="welcomeState">
-                <div class="welcome-ico">🚌</div>
-                <h3>Find Your Next Ride</h3>
-                <p>Tap anywhere on the Toronto map to instantly see nearby TTC bus lines, streetcar stops, and arrival estimates.</p>
+                <div class="welcome-ico">🗺️</div>
+                <h3>Explore Nearby Routes</h3>
+                <p>Click anywhere near CF Fairview Mall, Don Mills, or across Toronto to view local bus stops and real-time interval estimations.</p>
                 <div class="welcome-steps">
-                    <div class="step"><div class="step-num">1</div><div>Click a location on the map</div></div>
-                    <div class="step"><div class="step-num">2</div><div>See all stops within 800 m radius</div></div>
-                    <div class="step"><div class="step-num">3</div><div>View comprehensive routes & destinations</div></div>
-                    <div class="step"><div class="step-num">4</div><div>Tap ↻ Refresh to update arrivals</div></div>
+                    <div class="step"><div class="step-num">1</div><div>Click a custom point on the map</div></div>
+                    <div class="step"><div class="step-num">2</div><div>Scans everything inside an 800m grid</div></div>
+                    <div class="step"><div class="step-num">3</div><div>Displays intervals and active directions</div></div>
                 </div>
             </div>
 
             <div class="loading" id="loadingState">
                 <div class="spinner"></div>
-                <p>Fetching nearby routes…</p>
+                <p>Locating transit platforms...</p>
             </div>
 
             <div class="no-results" id="noResults">
-                <div style="font-size:36px;">😕</div>
-                <p>No stops found within 800 m.<br>Try clicking closer to a major intersection or transit corridor.</p>
+                <div style="font-size:32px; margin-bottom:8px;">🔍</div>
+                <p>No bus lines tracked within 800m of this grid location.<br>Try clicking a bit closer to a street intersection.</p>
             </div>
 
             <div class="stops-list" id="stopsList"></div>
-
         </div>
 
         <div class="disclaimer">
-            ⚠️ <strong>Demo Mode:</strong> This UI simulates the TTC BusTime NVAS API
-            (<a href="https://open.toronto.ca/dataset/ttc-bustime-real-time-next-vehicle-arrival-nvas/" target="_blank" style="color:#b7791f;">open.toronto.ca</a>).
-            Live data requires server-side proxy with API credentials. ETAs shown are simulated for demonstration.
+            ℹ️ <strong>Developer Sandbox:</strong> Simulating live platform streams via the local node framework. Built to reference Toronto open data parameters. Click on any stop flag to inspect.
         </div>
     </aside>
+
+    <div id="map-wrap">
+        <div id="map"></div>
+        <div class="map-hint" id="mapHint">📍 Click anywhere on the map to find nearby bus lines</div>
+        <div class="legend">
+            <div class="legend-row"><div class="legend-dot" style="background:#1a73e8; border: 2px solid white; box-shadow: 0 0 2px rgba(0,0,0,0.4);"></div> Selected Center</div>
+            <div class="legend-row"><div class="legend-dot" style="background:#da291c;"></div> Local Bus Stop</div>
+            <div class="legend-row"><div class="legend-dot" style="background:#1a73e8; opacity: 0.15; border: 1px dashed #1a73e8;"></div> 800m Radius Area</div>
+        </div>
+    </div>
+
 </div>
 
 <script>
 // ══════════════════════════════════════
-// Expanded TTC Data Matrix (Including Deep Don Mills & North York Coverage)
+// Expanded Toronto Data Matrix (Focused Intensively on Don Mills / CF Fairview Mall)
 // ══════════════════════════════════════
 const STOPS = [
-    // ─── NORTH YORK AREA HUNDREDS ───
-    { id:10, name:"Finch Ave W at Yonge St (Finch Station)", lat:43.7801, lng:-79.4148,
-      routes:[{n:"36",  d:"Humber College",          t:"bus"},     {n:"36A",d:"Finch Station W",        t:"bus"}, {n:"939",d:"Finch Express",t:"express"}]},
-    { id:41, name:"Finch Ave E at Yonge St", lat:43.7807, lng:-79.4135,
-      routes:[{n:"39",  d:"Neilson Rd",              t:"bus"},     {n:"42", d:"Cummer",                 t:"bus"}, {n:"97", d:"Steeles",t:"bus"}]},
-    { id:12, name:"Sheppard Ave E at Yonge St (Sheppard-Yonge Stn)", lat:43.7616, lng:-79.4104,
-      routes:[{n:"85",  d:"Morningside Ave",         t:"bus"},     {n:"84", d:"Downsview Park",        t:"bus"}, {n:"97", d:"Davisville Stn",t:"bus"}]},
-    { id:42, name:"Sheppard Ave W at Yonge St", lat:43.7619, lng:-79.4125,
-      routes:[{n:"84A", d:"Weston Rd",               t:"bus"},     {n:"98", d:"Steeles via Willowdale",t:"bus"}]},
-    { id:32, name:"Yonge St at Lawrence Ave (Lawrence Station)", lat:43.7258, lng:-79.3991,
-      routes:[{n:"97",  d:"York Mills Stn",          t:"bus"},     {n:"52", d:"Pearson Airport",       t:"bus"}, {n:"162",d:"Don Mills",t:"bus"}]},
-    { id:33, name:"Sheppard Ave W at Bathurst St",     lat:43.7548, lng:-79.4235,
-      routes:[{n:"84",  d:"Sheppard West Stn",       t:"bus"},     {n:"7",  d:"Wilson Station",        t:"bus"}, {n:"984",d:"Sheppard Express",t:"express"}]},
-    { id:21, name:"Steeles Ave W at Bathurst St",      lat:43.7969, lng:-79.4239,
-      routes:[{n:"60",  d:"Kipling Station",         t:"bus"},     {n:"7",  d:"Wilson Station",        t:"bus"}]},
-    { id:40, name:"Steeles Ave E at Yonge St",         lat:43.7971, lng:-79.4162,
-      routes:[{n:"60",  d:"Steeles & Humber",        t:"bus"},     {n:"53", d:"Steeles East",          t:"bus"}, {n:"953",d:"Steeles Express",t:"express"}]},
-    { id:20, name:"Wilson Ave at Allen Rd (Wilson Station)", lat:43.7344, lng:-79.4462,
-      routes:[{n:"96",  d:"Humber College",          t:"bus"},     {n:"165",d:"Yorkdale Station",      t:"bus"}, {n:"29", d:"Dufferin Loop",t:"bus"}]},
-    { id:29, name:"Dufferin St at Lawrence Ave W",     lat:43.7190, lng:-79.4581,
-      routes:[{n:"29",  d:"Dufferin Station",        t:"bus"},     {n:"29B",d:"Wilson Station",        t:"bus"}, {n:"929",d:"Dufferin Express",t:"express"}]},
-    { id:39, name:"Lawrence Ave W at Allen Rd",        lat:43.7225, lng:-79.4437,
-      routes:[{n:"52",  d:"Lawrence West Stn",       t:"bus"},     {n:"52B",d:"Weston Rd",             t:"bus"}]},
-
-    // ─── DON MILLS AREA CORRIDORS ───
-    { id:14, name:"Eglinton Ave E at Don Mills Rd",    lat:43.7102, lng:-79.3392,
-      routes:[{n:"34",  d:"Kennedy Stn",             t:"bus"},     {n:"25", d:"Don Mills Station",     t:"bus"}, {n:"100",d:"Broadview Stn",t:"bus"}, {n:"925",d:"Don Mills Express",t:"express"}]},
-    { id:34, name:"Don Mills Rd at Lawrence Ave E",    lat:43.7284, lng:-79.3388,
-      routes:[{n:"25",  d:"Don Mills Station",       t:"bus"},     {n:"54", d:"Kennedy Station",       t:"bus"}, {n:"54A",d:"Starspray Loop",t:"bus"}, {n:"925",d:"Don Mills Express",t:"express"}]},
-    { id:43, name:"Don Mills Rd at Sheppard Ave E (Don Mills Station)", lat:43.7753, lng:-79.3458,
-      routes:[{n:"25",  d:"Steeles E",               t:"bus"},     {n:"85", d:"Meadowvale",            t:"bus"}, {n:"169",d:"Huntingwood",t:"bus"}, {n:"925",d:"Don Mills Express",t:"express"}]},
-    { id:44, name:"Don Mills Rd at Van Horne Ave",     lat:43.7885, lng:-79.3512,
+    // ─── HIGH DENSITY BUS COVERAGE: CF FAIRVIEW MALL / DON MILLS STATION ───
+    { id:101, name:"Don Mills Station - Passenger Pick-Up Platform", lat:43.7753, lng:-79.3458,
+      routes:[{n:"25",  d:"Steeles East",            t:"bus"},     {n:"85", d:"Meadowvale",            t:"bus"}, {n:"925",d:"Don Mills Express",t:"express"}, {n:"985",d:"Sheppard East Express",t:"express"}]},
+    { id:102, name:"Sheppard Ave E at Don Mills Rd (Fairview Mall Entrance)", lat:43.7762, lng:-79.3472,
+      routes:[{n:"85A", d:"Don Mills Station",       t:"bus"},     {n:"169A",d:"Scarborough Centre",   t:"bus"}, {n:"385",d:"Sheppard East Night",t:"bus"}]},
+    { id:103, name:"Don Mills Rd at Sheppard Ave E (Southeast Corner)", lat:43.7745, lng:-79.3462,
+      routes:[{n:"25A", d:"Pape Station",            t:"bus"},     {n:"925",d:"Pape Station Express",  t:"express"}]},
+    { id:104, name:"Fairview Mall Dr at Godstone Rd", lat:43.7778, lng:-79.3441,
+      routes:[{n:"10",  d:"Van Horne",               t:"bus"},     {n:"169B",d:"Don Mills Station",    t:"bus"}]},
+    { id:105, name:"Sheppard Ave E at Parkway Forest Dr", lat:43.7759, lng:-79.3411,
+      routes:[{n:"85",  d:"Sheppard-Yonge Stn",      t:"bus"},     {n:"985",d:"Sheppard-Yonge Express",t:"express"}]},
+    { id:106, name:"Don Mills Rd at Leith Hill Rd", lat:43.7712, lng:-79.3444,
+      routes:[{n:"25",  d:"Don Mills Station",       t:"bus"},     {n:"25B",d:"Steeles East",          t:"bus"}]},
+    { id:107, name:"Parkway Forest Dr at Forest Manor Rd", lat:43.7731, lng:-79.3425,
+      routes:[{n:"169A",d:"Don Mills Station",       t:"bus"}]},
+    { id:108, name:"Sheppard Ave E at Brian Dr", lat:43.7771, lng:-79.3361,
+      routes:[{n:"85",  d:"Meadowvale Ave",          t:"bus"},     {n:"385",d:"Rouge Hill GO",         t:"bus"}]},
+    { id:109, name:"Don Mills Rd at Van Horne Ave", lat:43.7885, lng:-79.3512,
       routes:[{n:"25B", d:"Steeles E",               t:"bus"},     {n:"10", d:"Van Horne",             t:"bus"}]},
-    { id:22, name:"York Mills Rd at Leslie St",        lat:43.7497, lng:-79.3622,
-      routes:[{n:"95",  d:"Don Mills Station",       t:"bus"},     {n:"51", d:"Bridlewood Mall",       t:"bus"}, {n:"995",d:"York Mills Express",t:"express"}]},
+    { id:110, name:"Don Mills Rd at Lawrence Ave E", lat:43.7284, lng:-79.3388,
+      routes:[{n:"25",  d:"Don Mills Station",       t:"bus"},     {n:"54", d:"Kennedy Station",       t:"bus"}, {n:"925",d:"Don Mills Express",t:"express"}]},
+    { id:111, name:"Eglinton Ave E at Don Mills Rd", lat:43.7102, lng:-79.3392,
+      routes:[{n:"34",  d:"Kennedy Stn",             t:"bus"},     {n:"100",d:"Broadview Stn",         t:"bus"}, {n:"925",d:"Don Mills Express",t:"express"}]},
 
-    // ─── DOWNTOWN CORE & STREETCAR NETWORK ───
-    { id:1,  name:"Yonge St at Bloor St E",           lat:43.6709, lng:-79.3864,
-      routes:[{n:"97",  d:"York Mills Stn",         t:"bus"},     {n:"11", d:"Bayview Stn",          t:"bus"}]},
-    { id:2,  name:"Bloor St W at Bay St",              lat:43.6703, lng:-79.3884,
-      routes:[{n:"94",  d:"Parkside Dr",             t:"bus"},     {n:"6",  d:"Exhibition Loop",       t:"bus"}]},
-    { id:3,  name:"Queen St W at University Ave",      lat:43.6533, lng:-79.3891,
+    // ─── HIGH DENSITY BUS COVERAGE: NORTH YORK CENTRE / YONGE STREET CORRIDOR ───
+    { id:201, name:"Finch Ave W at Yonge St (Finch Station Terminal)", lat:43.7801, lng:-79.4148,
+      routes:[{n:"36",  d:"Humber College",          t:"bus"},     {n:"36A",d:"Finch Station W",       t:"bus"}, {n:"939",d:"Finch Express",t:"express"}]},
+    { id:202, name:"Finch Ave E at Yonge St", lat:43.7807, lng:-79.4135,
+      routes:[{n:"39",  d:"Neilson Rd",              t:"bus"},     {n:"42", d:"Cummer",                 t:"bus"}]},
+    { id:203, name:"Sheppard Ave E at Yonge St (Sheppard Terminal)", lat:43.7616, lng:-79.4104,
+      routes:[{n:"85",  d:"Morningside Ave",         t:"bus"},     {n:"84", d:"Downsview Park",        t:"bus"}, {n:"97", d:"Davisville Stn",t:"bus"}]},
+    { id:204, name:"Yonge St at Lawrence Ave (Lawrence Station)", lat:43.7258, lng:-79.3991,
+      routes:[{n:"97",  d:"Steeles Ave",             t:"bus"},     {n:"52", d:"Pearson Airport",       t:"bus"}]},
+    { id:205, name:"Sheppard Ave W at Bathurst St", lat:43.7548, lng:-79.4235,
+      routes:[{n:"84",  d:"Sheppard West Stn",       t:"bus"},     {n:"984",d:"Sheppard Express",      t:"express"}]},
+
+    // ─── DOWNTOWN TORONTO STREETCAR NETWORK CORE ───
+    { id:301, name:"Queen St W at University Ave (Osgoode Stn)", lat:43.6508, lng:-79.3879,
       routes:[{n:"501", d:"Long Branch Loop",        t:"streetcar"},{n:"501",d:"Neville Park Loop",    t:"streetcar"}]},
-    { id:4,  name:"King St W at Bay St",               lat:43.6484, lng:-79.3817,
+    { id:302, name:"King St W at Bay St", lat:43.6484, lng:-79.3817,
       routes:[{n:"504", d:"Broadview Stn",           t:"streetcar"},{n:"504",d:"Dundas West Stn",      t:"streetcar"}]},
-    { id:5,  name:"Dundas St W at University Ave",     lat:43.6566, lng:-79.3886,
-      routes:[{n:"505", d:"Dundas West Stn",         t:"streetcar"},{n:"505",d:"Parliament St",        t:"streetcar"}]},
-    { id:6,  name:"Spadina Ave at College St",         lat:43.6582, lng:-79.4006,
-      routes:[{n:"510", d:"Spadina Stn",             t:"streetcar"},{n:"506",d:"Main Station",         t:"streetcar"}]},
-    { id:7,  name:"Bathurst St at Bloor St W",         lat:43.6666, lng:-79.4116,
-      routes:[{n:"7",   d:"Wilson Stn",              t:"bus"},     {n:"511",d:"Fleet St Loop",         t:"streetcar"}]},
-    { id:8,  name:"St Clair Ave W at Yonge St",        lat:43.6877, lng:-79.3965,
-      routes:[{n:"512", d:"Gunns Loop",              t:"streetcar"},{n:"97", d:"York Mills Stn",       t:"bus"}]},
-    { id:9,  name:"St Clair Ave W at Bathurst St",     lat:43.6877, lng:-79.4149,
-      routes:[{n:"512", d:"Gunns Loop",              t:"streetcar"},{n:"7",  d:"Wilson Stn",           t:"bus"}]},
-    { id:23, name:"College St at Spadina Ave",         lat:43.6596, lng:-79.4019,
-      routes:[{n:"506", d:"High Park Loop",          t:"streetcar"},{n:"510",d:"Union Station",        t:"streetcar"}]},
-    { id:24, name:"Dundas St W at Spadina Ave",        lat:43.6531, lng:-79.4001,
-      routes:[{n:"505", d:"Dundas West Stn",         t:"streetcar"},{n:"510",d:"Union Station",        t:"streetcar"}]},
-    { id:25, name:"Queen St W at Spadina Ave",         lat:43.6491, lng:-79.4001,
-      routes:[{n:"501", d:"Long Branch Loop",        t:"streetcar"},{n:"501",d:"Neville Park Loop",    t:"streetcar"}]},
-    { id:26, name:"Lakeshore Blvd W at Strachan Ave",  lat:43.6368, lng:-79.4066,
-      routes:[{n:"509", d:"Union Station",           t:"streetcar"},{n:"511",d:"Bathurst Station",     t:"streetcar"}]},
-    { id:36, name:"College St at Yonge St",            lat:43.6601, lng:-79.3832,
-      routes:[{n:"506", d:"High Park Loop",          t:"streetcar"},{n:"94", d:"Wellesley Stn",        t:"bus"}]},
-    { id:37, name:"Front St W at Union Station",       lat:43.6452, lng:-79.3806,
-      routes:[{n:"509", d:"Harbourfront",            t:"streetcar"},{n:"6",  d:"Bay & Exhibition",     t:"bus"}]},
-      
-    // ─── SCARBOROUGH / EAST CORRIDORS ───
-    { id:11, name:"Finch Ave E at Victoria Park",      lat:43.7766, lng:-79.3112,
-      routes:[{n:"39",  d:"Finch Station",           t:"bus"},     {n:"39A",d:"Rouge Hill GO",         t:"bus"}]},
-    { id:13, name:"Eglinton Ave W at Yonge St",        lat:43.7067, lng:-79.3981,
-      routes:[{n:"32",  d:"Pearson Airport",         t:"bus"},     {n:"34", d:"Kingston Rd",           t:"bus"}]},
-    { id:15, name:"Lawrence Ave E at Victoria Park",   lat:43.7270, lng:-79.3107,
-      routes:[{n:"54",  d:"Lawrence Station",        t:"bus"},     {n:"54B",d:"Scarborough Town Ctr",  t:"bus"}]},
-    { id:16, name:"McCowan Rd at Sheppard Ave E",      lat:43.7738, lng:-79.2582,
-      routes:[{n:"116", d:"Scarborough GO",          t:"bus"},     {n:"85", d:"Morningside Ave",       t:"bus"}]},
-    { id:17, name:"Kennedy Rd at Lawrence Ave E",      lat:43.7260, lng:-79.2750,
-      routes:[{n:"43",  d:"Kennedy Station",         t:"bus"},     {n:"54", d:"Kennedy Station",       t:"bus"}]},
-    { id:27, name:"Danforth Ave at Pape Ave",          lat:43.6794, lng:-79.3450,
-      routes:[{n:"8",   d:"Broadview Station",       t:"bus"},     {n:"72", d:"Pape Station",          t:"bus"}]},
-    { id:28, name:"Kingston Rd at Queen St E",         lat:43.6641, lng:-79.2939,
-      routes:[{n:"22",  d:"Coxwell Station",         t:"bus"},     {n:"92", d:"Woodbine Station",      t:"bus"}]},
-    { id:35, name:"Warden Ave at Eglinton Ave E",      lat:43.7105, lng:-79.2930,
-      routes:[{n:"20",  d:"Warden Station",          t:"bus"},     {n:"34", d:"Kennedy Station",       t:"bus"}]},
-
-    // ─── WEST END CORRIDORS ───
-    { id:18, name:"Kipling Ave at Bloor St W",         lat:43.6426, lng:-79.5366,
-      routes:[{n:"45",  d:"Rathburn Rd",             t:"bus"},     {n:"123",d:"Kipling Station",       t:"bus"}]},
-    { id:19, name:"Islington Ave at Bloor St W",       lat:43.6440, lng:-79.5232,
-      routes:[{n:"37",  d:"Islington Station",       t:"bus"},     {n:"37B",d:"Kipling Station",       t:"bus"}]},
-    { id:38, name:"Bloor St W at Jane St",             lat:43.6490, lng:-79.4747,
-      routes:[{n:"35",  d:"Jane Station",            t:"bus"},     {n:"49", d:"Bloor West Stn",        t:"bus"}]},
-    { id:30, name:"Jane St at Eglinton Ave W",         lat:43.6988, lng:-79.4784,
-      routes:[{n:"35",  d:"Jane Station",            t:"bus"},     {n:"35D",d:"York University",       t:"bus"}, {n:"32", d:"Pearson Airport", t:"bus"}]}
+    { id:303, name:"College St at Spadina Ave", lat:43.6596, lng:-79.4019,
+      routes:[{n:"506", d:"High Park Loop",          t:"streetcar"},{n:"510",d:"Union Station",        t:"streetcar"}]}
 ];
 
 // ══════════════════════════════════════
-// Utility functions
+// Distance Calculations & Helpers
 // ══════════════════════════════════════
 function haversine(lat1, lng1, lat2, lng2) {
     const R = 6371000, toRad = x => x * Math.PI / 180;
@@ -547,223 +463,165 @@ function haversine(lat1, lng1, lat2, lng2) {
 }
 
 function fmtDist(m) { return m < 1000 ? `${Math.round(m)} m` : `${(m/1000).toFixed(1)} km`; }
-
-function randomETA(min=1, max=20) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-
-function etaClass(m) {
-    if (m <= 2) return 'eta-now';
-    if (m <= 10) return 'eta-soon';
-    return 'eta-later';
-}
-
-function etaLabel(m) {
-    if (m <= 1) return 'Arriving';
-    return `${m} min`;
-}
+function randomETA(min=1, max=15) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 
 function getNearby(lat, lng, radius=800) {
     return STOPS.map(s => ({ ...s, dist: haversine(lat, lng, s.lat, s.lng) }))
                 .filter(s => s.dist <= radius)
-                .sort((a, b) => a.dist - b.dist); // Removed .slice constraint to make sure ALL nearby routes render
+                .sort((a, b) => a.dist - b.dist);
 }
 
 function attachETAs(stops) {
     return stops.map(s => ({
         ...s,
         routes: s.routes.map(r => {
-            const e1 = randomETA(1, 12);
-            const e2 = e1 + randomETA(5, 18);
+            const e1 = randomETA(1, 9);
+            const e2 = e1 + randomETA(6, 14);
             return { ...r, eta1: e1, eta2: e2 };
         })
     }));
 }
 
 // ══════════════════════════════════════
-// State
+// Map & System Initial State
 // ══════════════════════════════════════
 let lastLat = null, lastLng = null, lastStops = [];
 let userMarker = null, radiusCircle = null, stopMarkers = [];
 
-// ══════════════════════════════════════
-// Map Setup (Clean Google Maps Style Representation)
-// ══════════════════════════════════════
-const map = L.map('map', { center: [43.7300, -79.3800], zoom: 12 });
+// Setting map viewport center explicitly at CF Fairview Mall / Don Mills Station
+const map = L.map('map', { center: [43.7753, -79.3458], zoom: 15 });
 
-// Using CartoDB Voyager theme tiles for a bright, pristine vector-like aesthetic mirroring Google Maps
+// CartoDB Voyager Tile layer representing Google Maps style
 L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
     attribution: '© OpenStreetMap contributors © CARTO',
     subdomains: 'abcd',
     maxZoom: 20
 }).addTo(map);
 
-// Custom locate control
-const LocateCtrl = L.Control.extend({
-    options: { position: 'topleft' },
-    onAdd() {
-        const btn = L.DomUtil.create('button', 'leaflet-locate-btn');
-        btn.title = 'Use my location';
-        btn.innerHTML = '📍';
-        btn.style.cssText = 'background:white;border:2px solid rgba(0,0,0,0.2);border-radius:4px;width:34px;height:34px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:4px;';
-        L.DomEvent.disableClickPropagation(btn);
-        btn.onclick = () => {
-            if (!navigator.geolocation) return;
-            navigator.geolocation.getCurrentPosition(
-                p => { map.setView([p.coords.latitude, p.coords.longitude], 14); handleClick(p.coords.latitude, p.coords.longitude); },
-                () => {}
-            );
-        };
-        return btn;
-    }
-});
-new LocateCtrl().addTo(map);
-
-const userIcon = L.divIcon({
-    html: `<div style="width:18px;height:18px;background:#1a73e8;border:3px solid white;border-radius:50%;box-shadow:0 0 0 4px rgba(26,115,232,0.25);"></div>`,
-    className: '', iconSize: [18, 18], iconAnchor: [9, 9]
+// Blue pin indicator representing selected map points
+const googleUserIcon = L.divIcon({
+    html: `<div style="width:16px; height:16px; background:#1a73e8; border:2.5px solid white; border-radius:50%; box-shadow:0 1px 4px rgba(0,0,0,0.4);"></div>`,
+    className: '', iconSize: [16, 16], iconAnchor: [8, 8]
 });
 
-function makeStopIcon(type) {
-    let bg = '#da291c';
-    if (type === 'streetcar') bg = '#553c9a';
-    if (type === 'express') bg = '#276749';
+function makeGoogleStopIcon(type) {
+    let color = '#da291c'; // Bus Red
+    if (type === 'express') color = '#137333'; // Express Green
+    if (type === 'streetcar') color = '#7b1fa2'; // Purple
     return L.divIcon({
-        html: `<div style="width:24px;height:24px;background:${bg};border:2px solid white;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;box-shadow:0 2px 6px rgba(0,0,0,0.2);">${type==='streetcar'?'🚃':'🚌'}</div>`,
+        html: `<div style="width:24px; height:24px; background:${color}; border:2px solid white; border-radius:4px; display:flex; align-items:center; justify-content:center; color:white; font-size:11px; box-shadow:0 1px 3px rgba(0,0,0,0.3); font-weight:bold;">🚏</div>`,
         className: '', iconSize: [24, 24], iconAnchor: [12, 12]
     });
 }
 
 // ══════════════════════════════════════
-// Click handler
+// Logic Event Listeners
 // ══════════════════════════════════════
 map.on('click', e => handleClick(e.latlng.lat, e.latlng.lng));
 
 function handleClick(lat, lng) {
     lastLat = lat; lastLng = lng;
 
-    // Hide overlay hint
     document.getElementById('mapHint').classList.add('hidden');
-
-    // Sidebar loading state setup
     show('loadingState');
     hide('welcomeState'); hide('stopsList'); hide('noResults');
     document.getElementById('refreshBtn').style.display = 'none';
     document.getElementById('locBar').style.display = 'none';
-    document.getElementById('sidebarSub').textContent = 'Locating nearby routes…';
 
-    // Set interactive user location pin
     if (userMarker) map.removeLayer(userMarker);
-    userMarker = L.marker([lat, lng], { icon: userIcon }).addTo(map)
-        .bindPopup('<b>Selected Hub Position</b>').openPopup();
+    userMarker = L.marker([lat, lng], { icon: googleUserIcon }).addTo(map);
 
-    // Reset map layout stops array
     stopMarkers.forEach(m => map.removeLayer(m)); stopMarkers = [];
 
-    // Map highlight radius configuration
     if (radiusCircle) map.removeLayer(radiusCircle);
     radiusCircle = L.circle([lat, lng], {
         radius: 800, color: '#1a73e8', fillColor: '#1a73e8',
-        fillOpacity: 0.04, weight: 1.5, dashArray: '5 5'
+        fillOpacity: 0.04, weight: 1.5, dashArray: '4 4'
     }).addTo(map);
 
-    // Dynamic latency step matching
     setTimeout(() => {
         const nearby = getNearby(lat, lng);
         lastStops = attachETAs(nearby);
 
-        // Append custom responsive icon marks onto map dashboard
         lastStops.forEach(s => {
             const primaryType = s.routes[0]?.t || 'bus';
-            const m = L.marker([s.lat, s.lng], { icon: makeStopIcon(primaryType) })
+            const m = L.marker([s.lat, s.lng], { icon: makeGoogleStopIcon(primaryType) })
                 .addTo(map)
                 .bindPopup(`<b>${s.name}</b><br><small>${fmtDist(s.dist)} away</small>`);
             stopMarkers.push(m);
         });
 
-        renderStops(lastStops, lat, lng);
-    }, 450);
+        renderUIStops(lastStops, lat, lng);
+    }, 300);
 }
 
-// ══════════════════════════════════════
-// Render stops
-// ══════════════════════════════════════
-function renderStops(stops, lat, lng) {
+function renderUIStops(stops, lat, lng) {
     hide('loadingState');
-
-    const locBar = document.getElementById('locBar');
     document.getElementById('locText').textContent = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-    locBar.style.display = 'flex';
-
-    const now = new Date();
-    const timeStr = now.toLocaleTimeString('en-CA', { hour: '2-digit', minute: '2-digit', hour12: true });
+    document.getElementById('locBar').style.display = 'flex';
 
     if (stops.length === 0) {
-        document.getElementById('sidebarSub').textContent = 'No routes found within 800 m';
+        document.getElementById('sidebarSub').textContent = 'No active lines near here';
         show('noResults'); return;
     }
 
-    document.getElementById('sidebarSub').textContent =
-        `${stops.length} stop location${stops.length>1?'s':''} captured · Updated ${timeStr}`;
+    const now = new Date();
+    const timestamp = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    document.getElementById('sidebarSub').textContent = `Found ${stops.length} platform areas · Updated ${timestamp}`;
     document.getElementById('refreshBtn').style.display = 'inline-block';
 
-    const list = document.getElementById('stopsList');
-    list.innerHTML = stops.map((stop, i) => {
-        const routeRows = stop.routes.map(r => {
-            const ec = etaClass(r.eta1);
-            const isStreetcar = r.t === 'streetcar';
-            const isExpress = r.t === 'express' || r.n.startsWith('9') || r.n.includes('X');
-            const badgeClass = isStreetcar ? 'streetcar' : (isExpress ? 'express' : '');
-            
-            let labelType = 'Bus';
-            if (isStreetcar) labelType = 'Streetcar';
-            if (isExpress) labelType = 'Express Bus';
+    const container = document.getElementById('stopsList');
+    container.innerHTML = stops.map(stop => {
+        const rows = stop.routes.map(r => {
+            let cls = 'eta-later';
+            if (r.eta1 <= 2) cls = 'eta-now';
+            else if (r.eta1 <= 6) cls = 'eta-soon';
+
+            let modeText = 'Local Bus';
+            if (r.t === 'express') modeText = 'Express Bus';
+            if (r.t === 'streetcar') modeText = 'Streetcar';
 
             return `
             <div class="route-row">
-                <div class="route-num ${badgeClass}">${r.n}</div>
+                <div class="route-num ${r.t}">${r.n}</div>
                 <div class="route-info">
-                    <div class="route-dest">→ ${r.d}</div>
-                    <div class="route-meta">${isStreetcar ? '🚃' : '🚌'} ${labelType} Line</div>
+                    <div class="route-dest">${r.d}</div>
+                    <div class="route-meta">${modeText}</div>
                 </div>
                 <div class="eta-col">
-                    <div class="eta-chip ${ec}">${etaLabel(r.eta1)}</div>
+                    <div class="eta-chip ${cls}">${r.eta1 <= 1 ? 'Arriving' : `${r.eta1} min`}</div>
                     <div class="eta-next">then ${r.eta2} min</div>
                 </div>
             </div>`;
         }).join('');
 
         return `
-        <div class="stop-card" style="animation: fadeIn 0.25s ease ${i * 0.05}s both;">
+        <div class="stop-card">
             <div class="stop-head">
                 <div class="stop-ico">🚏</div>
-                <div style="flex:1;">
+                <div>
                     <div class="stop-name">${stop.name}</div>
                     <div class="stop-dist">🚶 ${fmtDist(stop.dist)} away · ~${Math.round(stop.dist / 80)} min walk</div>
                 </div>
             </div>
-            <div class="routes-wrap">${routeRows}</div>
+            <div class="routes-wrap">${rows}</div>
         </div>`;
     }).join('');
 
-    list.style.display = 'flex';
+    show('stopsList');
 }
 
 function refreshETAs() {
     if (lastLat === null) return;
     lastStops = attachETAs(lastStops);
-    renderStops(lastStops, lastLat, lastLng);
+    renderUIStops(lastStops, lastLat, lastLng);
 }
 
-// Automatic feed pulse tracking updates every 60s
-setInterval(() => { if (lastLat !== null) refreshETAs(); }, 60000);
+// Automatic interval updating loop
+setInterval(() => { if (lastLat !== null) refreshETAs(); }, 45000);
 
-// Helper state controls
 function show(id) { document.getElementById(id).style.display = 'flex'; }
 function hide(id) { document.getElementById(id).style.display = 'none'; }
-
-// Embedded responsive fade style rules
-const style = document.createElement('style');
-style.textContent = `@keyframes fadeIn { from { opacity:0; transform: translateY(5px); } to { opacity:1; transform: translateY(0); } }`;
-document.head.appendChild(style);
 </script>
 </body>
 </html>
