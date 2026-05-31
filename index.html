@@ -2,626 +2,884 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TTC Real-Time Transit Tracker · Toronto</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>TTC & YRT Transit Tracker · Greater Toronto</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background: #f8f9fa;
-            color: #202124;
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
+        :root {
+            --ttc:      #da291c;
+            --yrt:      #007a3d;
+            --viva:     #6b21a8;
+            --hdr:      52px;
+            --flt:      42px;
         }
 
-        /* ─── Google Maps Style Header ─── */
+        html, body { height: 100%; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #f0f4f8; overflow: hidden; }
+
+        .app { height: 100%; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* ─── Header ─── */
         .header {
-            background: #ffffff;
-            border-bottom: 1px solid #dadce0;
-            padding: 0 24px;
-            height: 64px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-shrink: 0;
-            z-index: 1001;
-            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.1), 0 2px 6px 2px rgba(60,64,67,0.15);
+            height: var(--hdr); background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex; align-items: center; padding: 0 14px; gap: 10px;
+            flex-shrink: 0; z-index: 1001;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.08);
         }
-        .brand { display: flex; align-items: center; gap: 14px; }
-        .brand-logo {
-            background: #da291c;
-            color: white;
-            font-weight: 800;
-            font-size: 14px;
-            letter-spacing: 0.5px;
-            border-radius: 6px;
-            padding: 6px 12px;
-            display: flex; align-items: center; justify-content: center;
+        .brand { display: flex; align-items: center; gap: 9px; flex: 1; min-width: 0; }
+        .badge-wrap { display: flex; gap: 4px; flex-shrink: 0; }
+        .badge {
+            height: 30px; padding: 0 8px; border-radius: 7px;
+            font-size: 12px; font-weight: 800; letter-spacing: .4px;
+            display: flex; align-items: center; color: #fff;
         }
-        .brand-title { font-size: 18px; font-weight: 500; color: #202124; letter-spacing: -0.2px; }
-        .brand-sub { font-size: 12px; color: #5f6368; margin-top: 2px; }
-        .header-right { display: flex; align-items: center; gap: 16px; }
-        .live-dot {
-            display: flex; align-items: center; gap: 6px;
-            font-size: 13px; color: #137333; font-weight: 500;
-            background: #e6f4ea; padding: 4px 12px; border-radius: 16px;
+        .badge.ttc  { background: var(--ttc); }
+        .badge.yrt  { background: var(--yrt); }
+        .brand-info { min-width: 0; }
+        .brand-title { font-size: 15px; font-weight: 700; color: #1a202c; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .brand-sub   { font-size: 10px; color: #a0aec0; }
+        .hdr-right   { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+        .live-pill {
+            display: flex; align-items: center; gap: 5px;
+            background: #f0fff4; border: 1px solid #c6f6d5;
+            border-radius: 20px; padding: 4px 10px;
+            font-size: 11px; color: #276749; font-weight: 600;
         }
-        .pulse {
-            width: 8px; height: 8px; background: #137333; border-radius: 50%;
-            animation: pulse 1.8s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.4; transform: scale(1.4); }
-        }
+        .pulse { width: 7px; height: 7px; background: #38a169; border-radius: 50%; animation: pulse 1.8s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.4;transform:scale(1.5);} }
 
-        /* ─── App Body Layout ─── */
-        .body-wrap {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-            position: relative;
+        /* ─── Filter Bar ─── */
+        .filter-bar {
+            height: var(--flt); background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex; align-items: center; padding: 0 12px; gap: 7px;
+            flex-shrink: 0; overflow-x: auto; scrollbar-width: none;
         }
+        .filter-bar::-webkit-scrollbar { display: none; }
+        .fbtn {
+            height: 28px; padding: 0 13px; border-radius: 20px;
+            border: 1.5px solid #e2e8f0; background: #fff;
+            font-size: 12px; font-weight: 600; color: #4a5568;
+            cursor: pointer; white-space: nowrap; flex-shrink: 0;
+            display: flex; align-items: center; gap: 5px;
+            transition: all .15s;
+        }
+        .fbtn.act { border-color: var(--ac); background: var(--abg); color: var(--atx); }
+        .fbtn[data-f="all"]  { --ac:#64748b; --abg:#f1f5f9; --atx:#1e293b; }
+        .fbtn[data-f="ttc"]  { --ac:var(--ttc); --abg:#fff5f5; --atx:var(--ttc); }
+        .fbtn[data-f="yrt"]  { --ac:var(--yrt); --abg:#f0fff4; --atx:var(--yrt); }
+        .fbtn[data-f="viva"] { --ac:var(--viva); --abg:#faf5ff; --atx:var(--viva); }
 
-        /* ─── Sidebar ─── */
-        .sidebar {
-            width: 400px;
-            background: #ffffff;
-            border-right: 1px solid #dadce0;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            z-index: 1000;
-            box-shadow: 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12);
-        }
+        /* ─── Main ─── */
+        .main { flex: 1; display: flex; overflow: hidden; position: relative; min-height: 0; }
 
-        .sidebar-head {
-            padding: 16px 20px;
-            background: #ffffff;
-            border-bottom: 1px solid #dadce0;
-            flex-shrink: 0;
-        }
-        .sidebar-head-top {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 6px;
-        }
-        .sidebar-title { font-size: 16px; font-weight: 500; color: #202124; }
-        .refresh-btn {
-            background: #1a73e8;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 6px 14px;
-            font-size: 12px;
-            font-weight: 500;
-            cursor: pointer;
-            display: none;
-            box-shadow: 0 1px 2px 0 rgba(66,133,244,0.3), 0 1px 3px 1px rgba(66,133,244,0.15);
-            transition: background 0.15s, box-shadow 0.15s;
-        }
-        .refresh-btn:hover { background: #1557b0; box-shadow: 0 2px 4px 0 rgba(66,133,244,0.4); }
-        .sidebar-sub { font-size: 13px; color: #5f6368; }
-
-        .loc-bar {
-            padding: 10px 20px;
-            background: #e8f0fe;
-            border-bottom: 1px solid #d2e3fc;
-            display: none;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            color: #1967d2;
-        }
-
-        .sidebar-body {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            background: #f8f9fa;
-        }
-        .sidebar-body::-webkit-scrollbar { width: 6px; }
-        .sidebar-body::-webkit-scrollbar-track { background: transparent; }
-        .sidebar-body::-webkit-scrollbar-thumb { background: #dadce0; border-radius: 4px; }
-
-        /* ─── Welcome Map State ─── */
-        .welcome {
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 24px;
-            gap: 12px;
-            background: white;
-            border-radius: 8px;
-            border: 1px solid #dadce0;
-        }
-        .welcome-ico {
-            font-size: 36px;
-            margin-bottom: 4px;
-        }
-        .welcome h3 { font-size: 18px; font-weight: 500; color: #202124; }
-        .welcome p { font-size: 13px; color: #5f6368; line-height: 1.6; max-width: 280px; }
-        .welcome-steps {
-            text-align: left;
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 12px 16px;
-            width: 100%;
-            margin-top: 12px;
-        }
-        .step {
-            display: flex; align-items: center; gap: 12px;
-            font-size: 13px; color: #3c4043;
-            padding: 6px 0;
-        }
-        .step-num {
-            background: #1a73e8; color: white;
-            width: 20px; height: 20px; border-radius: 50%;
-            font-size: 11px; font-weight: bold;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
-        }
-
-        /* ─── Loading / Spinners ─── */
-        .loading {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 48px 0;
-            gap: 16px;
-        }
-        .spinner {
-            width: 32px; height: 32px;
-            border: 3px solid #e8eaed;
-            border-top-color: #1a73e8;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .loading p { font-size: 13px; color: #5f6368; }
-
-        /* ─── Stop Result Cards ─── */
-        .stops-list { display: none; flex-direction: column; gap: 12px; }
-        .stop-card {
-            background: #ffffff;
-            border: 1px solid #dadce0;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3);
-            transition: box-shadow 0.2s;
-        }
-        .stop-card:hover {
-            box-shadow: 0 1px 3px 0 rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15);
-        }
-        .stop-head {
-            display: flex; align-items: center; gap: 12px;
-            padding: 12px 16px;
-            background: #ffffff;
-            border-bottom: 1px solid #e8eaed;
-        }
-        .stop-ico {
-            width: 32px; height: 32px;
-            background: #e8f0fe;
-            color: #1a73e8;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 16px;
-            flex-shrink: 0;
-        }
-        .stop-name { font-size: 14px; font-weight: 500; color: #202124; line-height: 1.3; }
-        .stop-dist { font-size: 12px; color: #5f6368; margin-top: 2px; }
-
-        .routes-wrap { padding: 4px 0; background: #ffffff; }
-        .route-row {
-            display: flex; align-items: center; gap: 14px;
-            padding: 10px 16px;
-            border-bottom: 1px solid #f1f3f4;
-        }
-        .route-row:last-child { border-bottom: none; }
-        
-        .route-num {
-            min-width: 48px; padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px; font-weight: 700;
-            text-align: center;
-            background: #e8f0fe; color: #1a73e8;
-        }
-        .route-num.express { background: #e6f4ea; color: #137333; }
-        .route-num.streetcar { background: #f3e5f5; color: #7b1fa2; }
-
-        .route-info { flex: 1; min-width: 0; }
-        .route-dest { font-size: 13px; font-weight: 500; color: #202124; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .route-meta { font-size: 11px; color: #70757a; margin-top: 2px; }
-
-        .eta-col { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
-        .eta-chip {
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 12px; font-weight: 700;
-            white-space: nowrap;
-        }
-        .eta-now { background: #e6f4ea; color: #137333; }
-        .eta-soon { background: #fef7e0; color: #b06000; }
-        .eta-later { background: #f1f3f4; color: #3c4043; }
-        .eta-next { font-size: 11px; color: #70757a; }
-
-        /* ─── Empty Search State ─── */
-        .no-results {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            padding: 48px 24px;
-            text-align: center;
-            gap: 12px;
-            background: white;
-            border-radius: 8px;
-            border: 1px solid #dadce0;
-        }
-        .no-results p { font-size: 14px; color: #5f6368; line-height: 1.5; }
-
-        /* ─── Map Container ─── */
-        #map-wrap {
-            flex: 1;
-            position: relative;
-        }
-        #map { width: 100%; height: 100%; }
+        /* ─── Map ─── */
+        #map-wrap { flex: 1; position: relative; overflow: hidden; }
+        #map { width: 100%; height: 100%; cursor: crosshair; }
 
         .map-hint {
-            position: absolute;
-            top: 16px;
-            left: 20px;
-            background: #ffffff;
-            border: 1px solid #dadce0;
-            padding: 12px 20px;
-            border-radius: 24px;
-            font-size: 14px;
-            color: #202124;
-            z-index: 500;
-            pointer-events: none;
-            box-shadow: 0 1px 3px 0 rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15);
-            transition: opacity 0.3s;
+            position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%);
+            background: rgba(255,255,255,.95); backdrop-filter: blur(4px);
+            border: 1px solid #e2e8f0; border-radius: 24px;
+            padding: 8px 18px; font-size: 12px; color: #4a5568;
+            z-index: 499; pointer-events: none; white-space: nowrap;
+            box-shadow: 0 4px 14px rgba(0,0,0,.1); transition: opacity .4s;
         }
         .map-hint.hidden { opacity: 0; }
 
-        .legend {
-            position: absolute;
-            bottom: 30px;
-            right: 20px;
-            background: white;
-            border: 1px solid #dadce0;
-            border-radius: 8px;
-            padding: 10px 14px;
-            font-size: 12px;
-            color: #3c4043;
-            z-index: 500;
-            box-shadow: 0 1px 3px 0 rgba(60,64,67,0.3);
-            display: flex; flex-direction: column; gap: 6px;
+        .map-legend {
+            position: absolute; top: 10px; right: 10px;
+            background: rgba(255,255,255,.95); border: 1px solid #e2e8f0;
+            border-radius: 8px; padding: 8px 11px; z-index: 499;
+            font-size: 10.5px; color: #4a5568; line-height: 2;
+            box-shadow: 0 2px 8px rgba(0,0,0,.07);
         }
-        .legend-row { display: flex; align-items: center; gap: 8px; }
-        .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .lg-row { display: flex; align-items: center; gap: 6px; }
+        .lg-d { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
+        .lg-sq { width: 11px; height: 11px; border-radius: 3px; flex-shrink: 0; }
 
-        .disclaimer {
-            padding: 12px 20px;
-            background: #fdf6e2;
-            border-top: 1px solid #fade8f;
-            font-size: 11px;
-            color: #664d03;
-            line-height: 1.5;
-            flex-shrink: 0;
+        /* ─── Panel ─── */
+        .panel {
+            width: 370px; background: #f7fafc;
+            border-left: 1px solid #e2e8f0;
+            display: flex; flex-direction: column;
+            overflow: hidden; flex-shrink: 0;
         }
 
-        /* Responsive */
+        /* Panel handle – mobile only */
+        .panel-handle { display: none; }
+
+        .panel-hd {
+            background: #fff; border-bottom: 1px solid #edf2f7;
+            padding: 11px 15px; flex-shrink: 0;
+        }
+        .panel-hd-row { display: flex; align-items: center; justify-content: space-between; }
+        .panel-title { font-size: 13px; font-weight: 700; color: #2d3748; }
+        .refr-btn {
+            display: none; height: 30px; padding: 0 12px;
+            background: #ebf8ff; color: #2b6cb0;
+            border: 1px solid #bee3f8; border-radius: 6px;
+            font-size: 11px; font-weight: 700; cursor: pointer;
+            align-items: center; gap: 4px;
+        }
+        .refr-btn:hover { background: #bee3f8; }
+        .panel-sub { font-size: 11px; color: #a0aec0; margin-top: 3px; }
+
+        .loc-bar {
+            display: none; align-items: center; gap: 6px;
+            background: #f0fff4; border-bottom: 1px solid #c6f6d5;
+            padding: 6px 15px; font-size: 11px; color: #276749;
+        }
+
+        /* Stats row */
+        .stats-row {
+            display: none; align-items: center; gap: 8px;
+            padding: 7px 12px; border-bottom: 1px solid #edf2f7;
+            background: #fff; flex-shrink: 0; overflow-x: auto;
+        }
+        .stat-chip {
+            display: flex; align-items: center; gap: 4px;
+            padding: 3px 10px; border-radius: 20px;
+            font-size: 11px; font-weight: 700; white-space: nowrap; flex-shrink: 0;
+        }
+        .stat-chip.ttc-c  { background: #fff5f5; color: var(--ttc); border: 1px solid #fecaca; }
+        .stat-chip.yrt-c  { background: #f0fff4; color: var(--yrt); border: 1px solid #bbf7d0; }
+        .stat-chip.viva-c { background: #faf5ff; color: var(--viva); border: 1px solid #e9d5ff; }
+
+        .panel-body {
+            flex: 1; overflow-y: auto; padding: 10px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .panel-body::-webkit-scrollbar { width: 4px; }
+        .panel-body::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; }
+
+        /* ─── Welcome ─── */
+        .welcome {
+            height: 100%; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 24px; text-align: center; gap: 10px;
+        }
+        .wc-icon {
+            width: 62px; height: 62px; border-radius: 50%;
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px; margin-bottom: 4px;
+        }
+        .welcome h3 { font-size: 15px; font-weight: 700; color: #2d3748; }
+        .welcome p  { font-size: 12px; color: #718096; line-height: 1.65; max-width: 260px; }
+        .agency-row { display: flex; gap: 7px; flex-wrap: wrap; justify-content: center; }
+        .ag-tag {
+            padding: 4px 12px; border-radius: 20px;
+            font-size: 11px; font-weight: 700; color: #fff;
+        }
+        .ag-tag.t { background: var(--ttc); }
+        .ag-tag.y { background: var(--yrt); }
+        .ag-tag.v { background: var(--viva); }
+        .steps-card {
+            background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
+            padding: 12px 14px; width: 100%; text-align: left; margin-top: 6px;
+        }
+        .step { display: flex; align-items: flex-start; gap: 9px; padding: 5px 0; font-size: 12px; color: #4a5568; line-height: 1.5; }
+        .sn {
+            width: 18px; height: 18px; border-radius: 50%;
+            font-size: 10px; font-weight: 700; color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; margin-top: 1px;
+        }
+
+        /* ─── Loading ─── */
+        .loading { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 48px 0; gap: 14px; }
+        .spinner { width: 34px; height: 34px; border: 3px solid #e2e8f0; border-top-color: var(--ttc); border-radius: 50%; animation: spin .7s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading p { font-size: 12px; color: #718096; }
+
+        /* ─── No results ─── */
+        .no-res { display: none; flex-direction: column; align-items: center; padding: 48px 20px; text-align: center; gap: 10px; }
+        .no-res p { font-size: 12px; color: #718096; line-height: 1.65; }
+        .show-all-btn {
+            padding: 7px 18px; border-radius: 20px; border: 1.5px solid #cbd5e0;
+            background: #fff; font-size: 12px; font-weight: 600; color: #4a5568; cursor: pointer;
+        }
+        .show-all-btn:hover { background: #f7fafc; }
+
+        /* ─── Stop cards ─── */
+        .stops-list { display: none; }
+
+        @keyframes fadeUp { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+
+        .stop-card {
+            background: #fff; border: 1px solid #e2e8f0;
+            border-radius: 12px; margin-bottom: 10px;
+            overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.05);
+            animation: fadeUp .3s ease both;
+            transition: box-shadow .2s;
+        }
+        .stop-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.09); }
+
+        .stop-hd {
+            display: flex; align-items: center; gap: 9px;
+            padding: 9px 13px; border-bottom: 1px solid #f0f4f8;
+            background: #f9fafb;
+        }
+        .sico {
+            width: 32px; height: 32px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; flex-shrink: 0;
+        }
+        .sico.ttc  { background: #fff5f5; }
+        .sico.yrt  { background: #f0fff4; }
+        .sico.viva { background: #faf5ff; }
+        .stop-name { font-size: 12px; font-weight: 700; color: #2d3748; line-height: 1.3; }
+        .stop-dist { font-size: 10px; color: #a0aec0; margin-top: 2px; }
+        .ag-badge {
+            margin-left: auto; padding: 2px 8px; border-radius: 20px;
+            font-size: 10px; font-weight: 800; color: #fff; flex-shrink: 0;
+        }
+        .ag-badge.ttc  { background: var(--ttc); }
+        .ag-badge.yrt  { background: var(--yrt); }
+        .ag-badge.viva { background: var(--viva); }
+
+        .route-row {
+            display: flex; align-items: center; gap: 9px;
+            padding: 7px 13px; border-bottom: 1px solid #f7fafc;
+            transition: background .12s;
+        }
+        .route-row:last-child { border-bottom: none; }
+        .route-row:hover { background: #fafafa; }
+
+        .rbadge {
+            min-width: 44px; height: 22px; padding: 0 5px;
+            border-radius: 5px; font-size: 11px; font-weight: 800;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; flex-shrink: 0;
+        }
+        .rb-ttc-bus        { background: #1a365d; }
+        .rb-ttc-sc         { background: #553c9a; }
+        .rb-ttc-ex         { background: #276749; }
+        .rb-yrt            { background: var(--yrt); }
+        .rb-viva-blue      { background: #0055b3; }
+        .rb-viva-purple    { background: #9b2c9b; }
+        .rb-viva-pink      { background: #d4006e; }
+        .rb-viva-orange    { background: #d95f00; }
+        .rb-viva-green     { background: #007a3d; }
+
+        .ri { flex: 1; min-width: 0; }
+        .r-dest { font-size: 12px; font-weight: 600; color: #2d3748; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .r-type { font-size: 10px; color: #a0aec0; margin-top: 1px; }
+
+        .eta-col { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0; }
+        .eta-chip { padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+        .eta-now   { background: #c6f6d5; color: #22543d; }
+        .eta-soon  { background: #fefcbf; color: #744210; }
+        .eta-later { background: #edf2f7; color: #4a5568; }
+        .eta-next  { font-size: 10px; color: #a0aec0; }
+
+        /* ─── Disclaimer ─── */
+        .disc {
+            padding: 7px 13px; background: #fffff0;
+            border-top: 1px solid #faf089;
+            font-size: 10px; color: #744210; line-height: 1.5; flex-shrink: 0;
+        }
+        .disc a { color: #b7791f; }
+
+        /* ══════════════════════════════════════════
+           MOBILE — bottom sheet overlay layout
+        ══════════════════════════════════════════ */
         @media (max-width: 768px) {
-            .body-wrap { flex-direction: column-reverse; }
-            .sidebar { width: 100%; height: 45vh; border-right: none; border-top: 1px solid #dadce0; }
-            #map-wrap { height: 55vh; }
-            .map-hint { left: 50%; transform: translateX(-50%); width: calc(100% - 40px); text-align: center; }
+
+            .brand-sub    { display: none; }
+            .live-pill span { display: none; }
+
+            #map-wrap {
+                position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            }
+
+            .map-hint { bottom: calc(52% + 12px); max-width: 88%; white-space: normal; text-align: center; }
+
+            .map-legend {
+                top: auto; bottom: calc(52% + 12px); right: 8px;
+                font-size: 10px;
+            }
+
+            /* Bottom sheet */
+            .panel {
+                position: absolute; bottom: 0; left: 0; right: 0;
+                width: 100%; height: 52%;
+                max-height: calc(100% - 56px);
+                border-left: none; border-top: 1px solid #e2e8f0;
+                border-radius: 18px 18px 0 0;
+                box-shadow: 0 -6px 28px rgba(0,0,0,.14);
+                z-index: 900;
+                transition: height .3s cubic-bezier(.4,0,.2,1);
+            }
+            .panel.sh-min  { height: 52px; }
+            .panel.sh-full { height: calc(100% - 56px); }
+
+            .panel-handle {
+                display: flex; flex-direction: column; align-items: center;
+                padding: 8px 0 4px; cursor: pointer;
+                background: #fff; border-radius: 18px 18px 0 0; flex-shrink: 0;
+            }
+            .handle-bar { width: 40px; height: 4px; background: #cbd5e0; border-radius: 4px; }
+            .handle-lbl { font-size: 10px; color: #a0aec0; margin-top: 3px; }
+
+            /* Hide content when minimized */
+            .panel.sh-min .loc-bar,
+            .panel.sh-min .panel-body,
+            .panel.sh-min .stats-row,
+            .panel.sh-min .disc { display: none !important; }
+
+            .panel-body { padding: 8px; }
+            .disc { font-size: 9.5px; }
+        }
+
+        @media (max-width: 420px) {
+            .badge { height: 26px; font-size: 11px; padding: 0 7px; }
+            .brand-title { font-size: 13px; }
+            .hdr-right .live-pill { padding: 3px 8px; }
         }
     </style>
 </head>
 <body>
+<div class="app">
 
+<!-- ═══ HEADER ═══ -->
 <header class="header">
     <div class="brand">
-        <div class="brand-logo">TTC</div>
-        <div>
+        <div class="badge-wrap">
+            <div class="badge ttc">TTC</div>
+            <div class="badge yrt">YRT</div>
+        </div>
+        <div class="brand-info">
             <div class="brand-title">Transit Tracker</div>
-            <div class="brand-sub">Toronto Bus & Streetcar Arrival Matrix</div>
+            <div class="brand-sub">Toronto & York Region · Real-Time ETA</div>
         </div>
     </div>
-    <div class="header-right">
-        <div class="live-dot"><div class="pulse"></div>Live Tracker Connected</div>
+    <div class="hdr-right">
+        <div class="live-pill"><div class="pulse"></div><span>Live</span></div>
     </div>
 </header>
 
-<div class="body-wrap">
+<!-- ═══ FILTER BAR ═══ -->
+<div class="filter-bar">
+    <button class="fbtn act" data-f="all"  onclick="setFilter('all',this)">🗺️ All Agencies</button>
+    <button class="fbtn"     data-f="ttc"  onclick="setFilter('ttc',this)">🚌 TTC</button>
+    <button class="fbtn"     data-f="yrt"  onclick="setFilter('yrt',this)">🟢 YRT Bus</button>
+    <button class="fbtn"     data-f="viva" onclick="setFilter('viva',this)">⚡ VIVA Rapid</button>
+</div>
 
-    <aside class="sidebar">
-        <div class="sidebar-head">
-            <div class="sidebar-head-top">
-                <div class="sidebar-title">Nearby Transit Hubs</div>
-                <button class="refresh-btn" id="refreshBtn" onclick="refreshETAs()">↻ Update Arrivals</button>
-            </div>
-            <div class="sidebar-sub" id="sidebarSub">Map focused on CF Fairview Mall</div>
-        </div>
+<!-- ═══ MAIN ═══ -->
+<div class="main" id="mainWrap">
 
-        <div class="loc-bar" id="locBar">
-            <span>📍</span>
-            <span id="locText"></span>
-        </div>
-
-        <div class="sidebar-body" id="sidebarBody">
-            <div class="welcome" id="welcomeState">
-                <div class="welcome-ico">🗺️</div>
-                <h3>Explore Nearby Routes</h3>
-                <p>Click anywhere near CF Fairview Mall, Don Mills, or across Toronto to view local bus stops and real-time interval estimations.</p>
-                <div class="welcome-steps">
-                    <div class="step"><div class="step-num">1</div><div>Click a custom point on the map</div></div>
-                    <div class="step"><div class="step-num">2</div><div>Scans everything inside an 800m grid</div></div>
-                    <div class="step"><div class="step-num">3</div><div>Displays intervals and active directions</div></div>
-                </div>
-            </div>
-
-            <div class="loading" id="loadingState">
-                <div class="spinner"></div>
-                <p>Locating transit platforms...</p>
-            </div>
-
-            <div class="no-results" id="noResults">
-                <div style="font-size:32px; margin-bottom:8px;">🔍</div>
-                <p>No bus lines tracked within 800m of this grid location.<br>Try clicking a bit closer to a street intersection.</p>
-            </div>
-
-            <div class="stops-list" id="stopsList"></div>
-        </div>
-
-        <div class="disclaimer">
-            ℹ️ <strong>Developer Sandbox:</strong> Simulating live platform streams via the local node framework. Built to reference Toronto open data parameters. Click on any stop flag to inspect.
-        </div>
-    </aside>
-
+    <!-- Map -->
     <div id="map-wrap">
         <div id="map"></div>
-        <div class="map-hint" id="mapHint">📍 Click anywhere on the map to find nearby bus lines</div>
-        <div class="legend">
-            <div class="legend-row"><div class="legend-dot" style="background:#1a73e8; border: 2px solid white; box-shadow: 0 0 2px rgba(0,0,0,0.4);"></div> Selected Center</div>
-            <div class="legend-row"><div class="legend-dot" style="background:#da291c;"></div> Local Bus Stop</div>
-            <div class="legend-row"><div class="legend-dot" style="background:#1a73e8; opacity: 0.15; border: 1px dashed #1a73e8;"></div> 800m Radius Area</div>
+        <div class="map-hint" id="mapHint">📍 Tap anywhere on the map to find nearby stops</div>
+        <div class="map-legend">
+            <div class="lg-row"><div class="lg-d" style="background:#3b82f6;box-shadow:0 0 0 2px rgba(59,130,246,.3)"></div>Your spot</div>
+            <div class="lg-row"><div class="lg-sq" style="background:#da291c"></div>TTC Stop</div>
+            <div class="lg-row"><div class="lg-sq" style="background:#007a3d;border-radius:50%"></div>YRT Stop</div>
+            <div class="lg-row"><div class="lg-sq" style="background:#6b21a8;border-radius:50%"></div>VIVA Stop</div>
+            <div class="lg-row"><div class="lg-d" style="background:#bee3f8;border:1.5px solid #3b82f6"></div>800 m radius</div>
         </div>
     </div>
 
+    <!-- Panel -->
+    <aside class="panel" id="panel">
+
+        <!-- Drag handle (mobile) -->
+        <div class="panel-handle" id="panelHandle" onclick="toggleSheet()">
+            <div class="handle-bar"></div>
+            <div class="handle-lbl" id="handleLbl">Drag up for stops</div>
+        </div>
+
+        <!-- Head -->
+        <div class="panel-hd">
+            <div class="panel-hd-row">
+                <div class="panel-title">Nearby Stops & Arrivals</div>
+                <button class="refr-btn" id="refrBtn" onclick="refreshETAs()">↻ Refresh</button>
+            </div>
+            <div class="panel-sub" id="panelSub">Tap the map to begin</div>
+        </div>
+
+        <!-- Location bar -->
+        <div class="loc-bar" id="locBar">📍 <span id="locTxt"></span></div>
+
+        <!-- Agency stats -->
+        <div class="stats-row" id="statsRow"></div>
+
+        <!-- Body -->
+        <div class="panel-body" id="panelBody">
+
+            <div class="welcome" id="stWelcome">
+                <div class="wc-icon">🚌</div>
+                <h3>Find Your Next Ride</h3>
+                <div class="agency-row">
+                    <span class="ag-tag t">TTC</span>
+                    <span class="ag-tag y">YRT</span>
+                    <span class="ag-tag v">VIVA</span>
+                </div>
+                <p>Tap anywhere in Toronto or York Region to see nearby stops, routes, and estimated arrival times.</p>
+                <div class="steps-card">
+                    <div class="step"><div class="sn" style="background:var(--ttc)">1</div>Tap a location on the map</div>
+                    <div class="step"><div class="sn" style="background:var(--yrt)">2</div>Stops within 800 m appear</div>
+                    <div class="step"><div class="sn" style="background:var(--viva)">3</div>View routes, destinations & ETA</div>
+                    <div class="step"><div class="sn" style="background:#2b6cb0">4</div>Filter by TTC / YRT / VIVA above</div>
+                </div>
+            </div>
+
+            <div class="loading" id="stLoading">
+                <div class="spinner"></div>
+                <p>Scanning nearby stops…</p>
+            </div>
+
+            <div class="no-res" id="stNoRes">
+                <div style="font-size:34px">😕</div>
+                <p>No stops found with this filter.<br>Try a different filter or tap closer to a road.</p>
+                <button class="show-all-btn" onclick="setFilter('all', document.querySelector('[data-f=all]'))">Show All Agencies</button>
+            </div>
+
+            <div class="stops-list" id="stopsList"></div>
+
+        </div>
+
+        <div class="disc">
+            ⚠️ <strong>Demo Mode:</strong> Simulates
+            <a href="https://open.toronto.ca/dataset/ttc-bustime-real-time-next-vehicle-arrival-nvas/" target="_blank">TTC BusTime NVAS</a>
+            + YRT GTFS-RT APIs. Live data requires server-side proxy with credentials. ETAs are simulated.
+        </div>
+    </aside>
 </div>
 
 <script>
-// ══════════════════════════════════════
-// Expanded Toronto Data Matrix (Focused Intensively on Don Mills / CF Fairview Mall)
-// ══════════════════════════════════════
+// ══════════════════════════════════════════════════════
+// STOP DATA  (TTC · YRT · VIVA)
+// ══════════════════════════════════════════════════════
 const STOPS = [
-    // ─── HIGH DENSITY BUS COVERAGE: CF FAIRVIEW MALL / DON MILLS STATION ───
-    { id:101, name:"Don Mills Station - Passenger Pick-Up Platform", lat:43.7753, lng:-79.3458,
-      routes:[{n:"25",  d:"Steeles East",            t:"bus"},     {n:"85", d:"Meadowvale",            t:"bus"}, {n:"925",d:"Don Mills Express",t:"express"}, {n:"985",d:"Sheppard East Express",t:"express"}]},
-    { id:102, name:"Sheppard Ave E at Don Mills Rd (Fairview Mall Entrance)", lat:43.7762, lng:-79.3472,
-      routes:[{n:"85A", d:"Don Mills Station",       t:"bus"},     {n:"169A",d:"Scarborough Centre",   t:"bus"}, {n:"385",d:"Sheppard East Night",t:"bus"}]},
-    { id:103, name:"Don Mills Rd at Sheppard Ave E (Southeast Corner)", lat:43.7745, lng:-79.3462,
-      routes:[{n:"25A", d:"Pape Station",            t:"bus"},     {n:"925",d:"Pape Station Express",  t:"express"}]},
-    { id:104, name:"Fairview Mall Dr at Godstone Rd", lat:43.7778, lng:-79.3441,
-      routes:[{n:"10",  d:"Van Horne",               t:"bus"},     {n:"169B",d:"Don Mills Station",    t:"bus"}]},
-    { id:105, name:"Sheppard Ave E at Parkway Forest Dr", lat:43.7759, lng:-79.3411,
-      routes:[{n:"85",  d:"Sheppard-Yonge Stn",      t:"bus"},     {n:"985",d:"Sheppard-Yonge Express",t:"express"}]},
-    { id:106, name:"Don Mills Rd at Leith Hill Rd", lat:43.7712, lng:-79.3444,
-      routes:[{n:"25",  d:"Don Mills Station",       t:"bus"},     {n:"25B",d:"Steeles East",          t:"bus"}]},
-    { id:107, name:"Parkway Forest Dr at Forest Manor Rd", lat:43.7731, lng:-79.3425,
-      routes:[{n:"169A",d:"Don Mills Station",       t:"bus"}]},
-    { id:108, name:"Sheppard Ave E at Brian Dr", lat:43.7771, lng:-79.3361,
-      routes:[{n:"85",  d:"Meadowvale Ave",          t:"bus"},     {n:"385",d:"Rouge Hill GO",         t:"bus"}]},
-    { id:109, name:"Don Mills Rd at Van Horne Ave", lat:43.7885, lng:-79.3512,
-      routes:[{n:"25B", d:"Steeles E",               t:"bus"},     {n:"10", d:"Van Horne",             t:"bus"}]},
-    { id:110, name:"Don Mills Rd at Lawrence Ave E", lat:43.7284, lng:-79.3388,
-      routes:[{n:"25",  d:"Don Mills Station",       t:"bus"},     {n:"54", d:"Kennedy Station",       t:"bus"}, {n:"925",d:"Don Mills Express",t:"express"}]},
-    { id:111, name:"Eglinton Ave E at Don Mills Rd", lat:43.7102, lng:-79.3392,
-      routes:[{n:"34",  d:"Kennedy Stn",             t:"bus"},     {n:"100",d:"Broadview Stn",         t:"bus"}, {n:"925",d:"Don Mills Express",t:"express"}]},
+    /* ── TTC ── */
+    {id:1,  ag:'TTC', name:"Yonge St at Bloor St E",               lat:43.6709,lng:-79.3864,
+     routes:[{n:"97",  d:"York Mills Stn",       t:"bus",ag:"TTC"},{n:"11", d:"Bayview Stn",        t:"bus",ag:"TTC"}]},
+    {id:2,  ag:'TTC', name:"Bloor St W at Bay St",                 lat:43.6703,lng:-79.3884,
+     routes:[{n:"94",  d:"Parkside Dr",           t:"bus",ag:"TTC"},{n:"6",  d:"Exhibition Loop",    t:"bus",ag:"TTC"}]},
+    {id:3,  ag:'TTC', name:"Queen St W at University Ave",         lat:43.6533,lng:-79.3891,
+     routes:[{n:"501", d:"Long Branch Loop",      t:"sc", ag:"TTC"},{n:"501",d:"Neville Park Loop",  t:"sc", ag:"TTC"}]},
+    {id:4,  ag:'TTC', name:"King St W at Bay St",                  lat:43.6484,lng:-79.3817,
+     routes:[{n:"504", d:"Broadview Stn",         t:"sc", ag:"TTC"},{n:"504",d:"Dundas West Stn",    t:"sc", ag:"TTC"}]},
+    {id:5,  ag:'TTC', name:"Dundas St W at University Ave",        lat:43.6566,lng:-79.3886,
+     routes:[{n:"505", d:"Dundas West Stn",       t:"sc", ag:"TTC"},{n:"505",d:"Parliament St",      t:"sc", ag:"TTC"}]},
+    {id:6,  ag:'TTC', name:"Spadina Ave at College St",            lat:43.6582,lng:-79.4006,
+     routes:[{n:"510", d:"Spadina Stn",           t:"sc", ag:"TTC"},{n:"506",d:"Main Station",       t:"sc", ag:"TTC"}]},
+    {id:7,  ag:'TTC', name:"Bathurst St at Bloor St W",            lat:43.6666,lng:-79.4116,
+     routes:[{n:"7",   d:"Wilson Stn",            t:"bus",ag:"TTC"},{n:"511",d:"Fleet St Loop",      t:"sc", ag:"TTC"}]},
+    {id:8,  ag:'TTC', name:"St Clair Ave W at Yonge St",           lat:43.6877,lng:-79.3965,
+     routes:[{n:"512", d:"Gunns Loop",            t:"sc", ag:"TTC"},{n:"97", d:"York Mills Stn",     t:"bus",ag:"TTC"}]},
+    {id:9,  ag:'TTC', name:"Eglinton Ave W at Yonge St",           lat:43.7067,lng:-79.3981,
+     routes:[{n:"32",  d:"Pearson Airport",       t:"bus",ag:"TTC"},{n:"34", d:"Kingston Rd",        t:"bus",ag:"TTC"}]},
+    {id:10, ag:'TTC', name:"Finch Ave W at Yonge St (TTC)",        lat:43.7801,lng:-79.4148,
+     routes:[{n:"36",  d:"Humber College",        t:"bus",ag:"TTC"},{n:"36A",d:"Finch Station",      t:"bus",ag:"TTC"}]},
+    {id:11, ag:'TTC', name:"Finch Ave E at Victoria Park",         lat:43.7766,lng:-79.3112,
+     routes:[{n:"39",  d:"Finch Station",         t:"bus",ag:"TTC"},{n:"39A",d:"Rouge Hill GO",      t:"bus",ag:"TTC"}]},
+    {id:12, ag:'TTC', name:"Sheppard Ave E at Yonge St",           lat:43.7616,lng:-79.4104,
+     routes:[{n:"85",  d:"Morningside Ave",       t:"bus",ag:"TTC"},{n:"84", d:"Downsview Park",     t:"bus",ag:"TTC"}]},
+    {id:13, ag:'TTC', name:"Danforth Ave at Pape Ave",             lat:43.6794,lng:-79.3450,
+     routes:[{n:"8",   d:"Broadview Station",     t:"bus",ag:"TTC"},{n:"72", d:"Sheppard-Yonge Stn", t:"bus",ag:"TTC"}]},
+    {id:14, ag:'TTC', name:"Front St W at Union Station",          lat:43.6452,lng:-79.3806,
+     routes:[{n:"509", d:"Harbourfront",          t:"sc", ag:"TTC"},{n:"6",  d:"Bay & Exhibition",   t:"bus",ag:"TTC"}]},
+    {id:15, ag:'TTC', name:"Jane St at Eglinton Ave W",            lat:43.6988,lng:-79.4784,
+     routes:[{n:"35",  d:"Jane Station",          t:"bus",ag:"TTC"},{n:"32", d:"Pearson Airport",    t:"bus",ag:"TTC"}]},
+    {id:16, ag:'TTC', name:"Steeles Ave W at Bathurst St",         lat:43.7969,lng:-79.4239,
+     routes:[{n:"60",  d:"Kipling Station",       t:"bus",ag:"TTC"},{n:"7",  d:"Wilson Station",     t:"bus",ag:"TTC"}]},
+    {id:17, ag:'TTC', name:"Don Mills Rd at Sheppard Ave E",       lat:43.7744,lng:-79.3456,
+     routes:[{n:"25",  d:"Don Mills Station",     t:"bus",ag:"TTC"},{n:"85", d:"Sheppard-Yonge Stn", t:"bus",ag:"TTC"}]},
+    {id:18, ag:'TTC', name:"Lawrence Ave E at Victoria Park",      lat:43.7270,lng:-79.3107,
+     routes:[{n:"54",  d:"Lawrence Station",      t:"bus",ag:"TTC"},{n:"54B",d:"Scarborough Town Ctr",t:"bus",ag:"TTC"}]},
+    {id:19, ag:'TTC', name:"Kipling Ave at Bloor St W",            lat:43.6426,lng:-79.5366,
+     routes:[{n:"45",  d:"Rathburn Rd",           t:"bus",ag:"TTC"},{n:"123",d:"Kipling Station",    t:"bus",ag:"TTC"}]},
+    {id:20, ag:'TTC', name:"Wilson Ave at Allen Rd",               lat:43.7344,lng:-79.4462,
+     routes:[{n:"96",  d:"Humber College",        t:"bus",ag:"TTC"},{n:"165",d:"Yorkdale Station",   t:"bus",ag:"TTC"}]},
+    {id:21, ag:'TTC', name:"College St at Spadina Ave",            lat:43.6596,lng:-79.4019,
+     routes:[{n:"506", d:"High Park Loop",        t:"sc", ag:"TTC"},{n:"510",d:"Union Station",      t:"sc", ag:"TTC"}]},
+    {id:22, ag:'TTC', name:"Sheppard Ave W at Bathurst St",        lat:43.7548,lng:-79.4235,
+     routes:[{n:"84",  d:"Sheppard West Stn",     t:"bus",ag:"TTC"},{n:"7",  d:"Wilson Station",     t:"bus",ag:"TTC"}]},
+    {id:23, ag:'TTC', name:"Dufferin St at Lawrence Ave W",        lat:43.7190,lng:-79.4581,
+     routes:[{n:"29",  d:"Dufferin Station",      t:"bus",ag:"TTC"},{n:"29B",d:"Wilson Station",     t:"bus",ag:"TTC"}]},
+    {id:24, ag:'TTC', name:"Islington Ave at Bloor St W",          lat:43.6440,lng:-79.5232,
+     routes:[{n:"37",  d:"Islington Station",     t:"bus",ag:"TTC"},{n:"37B",d:"Kipling Station",    t:"bus",ag:"TTC"}]},
+    {id:25, ag:'TTC', name:"Yonge St at Lawrence Ave",             lat:43.7258,lng:-79.3991,
+     routes:[{n:"97",  d:"York Mills Stn",        t:"bus",ag:"TTC"},{n:"54", d:"Lawrence Station",   t:"bus",ag:"TTC"}]},
 
-    // ─── HIGH DENSITY BUS COVERAGE: NORTH YORK CENTRE / YONGE STREET CORRIDOR ───
-    { id:201, name:"Finch Ave W at Yonge St (Finch Station Terminal)", lat:43.7801, lng:-79.4148,
-      routes:[{n:"36",  d:"Humber College",          t:"bus"},     {n:"36A",d:"Finch Station W",       t:"bus"}, {n:"939",d:"Finch Express",t:"express"}]},
-    { id:202, name:"Finch Ave E at Yonge St", lat:43.7807, lng:-79.4135,
-      routes:[{n:"39",  d:"Neilson Rd",              t:"bus"},     {n:"42", d:"Cummer",                 t:"bus"}]},
-    { id:203, name:"Sheppard Ave E at Yonge St (Sheppard Terminal)", lat:43.7616, lng:-79.4104,
-      routes:[{n:"85",  d:"Morningside Ave",         t:"bus"},     {n:"84", d:"Downsview Park",        t:"bus"}, {n:"97", d:"Davisville Stn",t:"bus"}]},
-    { id:204, name:"Yonge St at Lawrence Ave (Lawrence Station)", lat:43.7258, lng:-79.3991,
-      routes:[{n:"97",  d:"Steeles Ave",             t:"bus"},     {n:"52", d:"Pearson Airport",       t:"bus"}]},
-    { id:205, name:"Sheppard Ave W at Bathurst St", lat:43.7548, lng:-79.4235,
-      routes:[{n:"84",  d:"Sheppard West Stn",       t:"bus"},     {n:"984",d:"Sheppard Express",      t:"express"}]},
+    /* ── YRT Bus ── */
+    {id:101,ag:'YRT', name:"Vaughan Metropolitan Centre",          lat:43.7944,lng:-79.5313,
+     routes:[{n:"20",  d:"Steeles Ave W",         t:"bus",ag:"YRT"},{n:"40", d:"Hwy 7 W",            t:"bus",ag:"YRT"},{n:"60",d:"Jane St",t:"bus",ag:"YRT"}]},
+    {id:102,ag:'YRT', name:"Promenade Mall Terminal",              lat:43.8019,lng:-79.4240,
+     routes:[{n:"1",   d:"Finch Station",         t:"bus",ag:"YRT"},{n:"7",  d:"Bathurst & Clark",   t:"bus",ag:"YRT"},{n:"5",d:"Bayview Stn",t:"bus",ag:"YRT"}]},
+    {id:103,ag:'YRT', name:"Richmond Hill Centre Terminal",        lat:43.8441,lng:-79.4275,
+     routes:[{n:"1",   d:"Finch Station",         t:"bus",ag:"YRT"},{n:"2",  d:"Major Mackenzie Dr", t:"bus",ag:"YRT"},{n:"5",d:"Aurora GO",t:"bus",ag:"YRT"}]},
+    {id:104,ag:'YRT', name:"Newmarket GO Bus Terminal",            lat:44.0570,lng:-79.4620,
+     routes:[{n:"1",   d:"Richmond Hill Centre",  t:"bus",ag:"YRT"},{n:"9",  d:"Jane St / VMC",      t:"bus",ag:"YRT"},{n:"44",d:"Mulock Dr",t:"bus",ag:"YRT"}]},
+    {id:105,ag:'YRT', name:"Aurora GO Station",                    lat:43.9993,lng:-79.4675,
+     routes:[{n:"1",   d:"Newmarket GO",          t:"bus",ag:"YRT"},{n:"5",  d:"Richmond Hill Ctr",  t:"bus",ag:"YRT"},{n:"40",d:"Yonge / Hwy 7",t:"bus",ag:"YRT"}]},
+    {id:106,ag:'YRT', name:"Markham Town Centre (Hwy 7 & Warden)",lat:43.8315,lng:-79.2980,
+     routes:[{n:"4",   d:"Don Mills Station",     t:"bus",ag:"YRT"},{n:"3",  d:"Steeles & Warden",   t:"bus",ag:"YRT"},{n:"40",d:"Unionville GO",t:"bus",ag:"YRT"}]},
+    {id:107,ag:'YRT', name:"Unionville GO Station",                lat:43.8417,lng:-79.3128,
+     routes:[{n:"4",   d:"Hwy 7 W",              t:"bus",ag:"YRT"},{n:"40", d:"Vaughan MC",          t:"bus",ag:"YRT"},{n:"90",d:"Markham Rd / Sheppard",t:"bus",ag:"YRT"}]},
+    {id:108,ag:'YRT', name:"Hwy 7 at Leslie St (Richmond Hill)",  lat:43.8302,lng:-79.3752,
+     routes:[{n:"4",   d:"Don Mills Station",     t:"bus",ag:"YRT"},{n:"4",  d:"Unionville GO",      t:"bus",ag:"YRT"},{n:"23",d:"Leslie / E Beaver Creek",t:"bus",ag:"YRT"}]},
+    {id:109,ag:'YRT', name:"Major Mackenzie Dr at Yonge St",       lat:43.8471,lng:-79.4142,
+     routes:[{n:"2",   d:"Jane St / VMC",         t:"bus",ag:"YRT"},{n:"2",  d:"Hwy 404",            t:"bus",ag:"YRT"},{n:"1",d:"Richmond Hill Ctr",t:"bus",ag:"YRT"}]},
+    {id:110,ag:'YRT', name:"Bathurst St at Clark Ave (Thornhill)", lat:43.8113,lng:-79.4385,
+     routes:[{n:"7",   d:"Promenade Mall",        t:"bus",ag:"YRT"},{n:"7",  d:"Aurora GO",          t:"bus",ag:"YRT"},{n:"16",d:"Dufferin & Clark",t:"bus",ag:"YRT"}]},
+    {id:111,ag:'YRT', name:"Steeles Ave W at Jane St",             lat:43.7971,lng:-79.4947,
+     routes:[{n:"9",   d:"Newmarket GO",          t:"bus",ag:"YRT"},{n:"21", d:"Jane & Langstaff",   t:"bus",ag:"YRT"},{n:"20",d:"Dufferin & Rutherford",t:"bus",ag:"YRT"}]},
+    {id:112,ag:'YRT', name:"Dufferin St at Rutherford Rd",         lat:43.8393,lng:-79.4858,
+     routes:[{n:"20",  d:"Steeles Ave W",         t:"bus",ag:"YRT"},{n:"20", d:"Vaughan MC",         t:"bus",ag:"YRT"}]},
+    {id:113,ag:'YRT', name:"McCowan Rd at Hwy 7 (Markham)",        lat:43.8302,lng:-79.2668,
+     routes:[{n:"3",   d:"Steeles & Warden",      t:"bus",ag:"YRT"},{n:"90", d:"Sheppard & Morningside",t:"bus",ag:"YRT"},{n:"12",d:"Markham Rd",t:"bus",ag:"YRT"}]},
+    {id:114,ag:'YRT', name:"Leslie St at Elgin Mills Rd",          lat:43.8763,lng:-79.3678,
+     routes:[{n:"23",  d:"Richmond Hill Centre",  t:"bus",ag:"YRT"},{n:"5",  d:"Bayview & 19th Ave", t:"bus",ag:"YRT"}]},
+    {id:115,ag:'YRT', name:"Warden Ave at Hwy 7 (Markham)",        lat:43.8313,lng:-79.3100,
+     routes:[{n:"3",   d:"Finch & Warden",        t:"bus",ag:"YRT"},{n:"3",  d:"Davis Dr Newmarket", t:"bus",ag:"YRT"}]},
+    {id:116,ag:'YRT', name:"Yonge St at 16th Ave (Richmond Hill)", lat:43.8441,lng:-79.4276,
+     routes:[{n:"1",   d:"Richmond Hill Centre",  t:"bus",ag:"YRT"},{n:"1",  d:"Finch Station",      t:"bus",ag:"YRT"}]},
+    {id:117,ag:'YRT', name:"Jane St at Langstaff Rd (Vaughan)",    lat:43.8178,lng:-79.4947,
+     routes:[{n:"9",   d:"Steeles & Jane",        t:"bus",ag:"YRT"},{n:"21", d:"Jane & Steeles",     t:"bus",ag:"YRT"}]},
+    {id:118,ag:'YRT', name:"Bayview Ave at Major Mackenzie",       lat:43.8471,lng:-79.3955,
+     routes:[{n:"5",   d:"Sheppard & Bayview",    t:"bus",ag:"YRT"},{n:"5",  d:"Aurora GO",          t:"bus",ag:"YRT"}]},
+    {id:119,ag:'YRT', name:"Woodbine Ave at Hwy 7 (Markham)",      lat:43.8335,lng:-79.3175,
+     routes:[{n:"4",   d:"Don Mills Station",     t:"bus",ag:"YRT"},{n:"40", d:"Unionville GO",      t:"bus",ag:"YRT"}]},
+    {id:120,ag:'YRT', name:"Davis Dr at Yonge St (Newmarket)",     lat:44.0455,lng:-79.4620,
+     routes:[{n:"1",   d:"Richmond Hill Centre",  t:"bus",ag:"YRT"},{n:"44", d:"Yonge & Davis",      t:"bus",ag:"YRT"}]},
+    {id:121,ag:'YRT', name:"Rutherford Rd at Jane St",             lat:43.8419,lng:-79.5007,
+     routes:[{n:"9",   d:"Newmarket GO",          t:"bus",ag:"YRT"},{n:"88", d:"VMC / Rutherford",   t:"bus",ag:"YRT"}]},
+    {id:122,ag:'YRT', name:"Don Mills Rd at Steeles Ave E",        lat:43.7967,lng:-79.3388,
+     routes:[{n:"4",   d:"Markham Town Centre",   t:"bus",ag:"YRT"},{n:"25", d:"Don Mills Station",  t:"bus",ag:"TTC"}]},
+    {id:123,ag:'YRT', name:"Hwy 7 at Don Mills Rd",                lat:43.8224,lng:-79.3564,
+     routes:[{n:"4",   d:"Don Mills Station",     t:"bus",ag:"YRT"},{n:"40", d:"Unionville GO",      t:"bus",ag:"YRT"}]},
+    {id:124,ag:'YRT', name:"Markham Rd at Steeles Ave",            lat:43.7966,lng:-79.2628,
+     routes:[{n:"90",  d:"Unionville GO",         t:"bus",ag:"YRT"},{n:"12", d:"Markham Centre",     t:"bus",ag:"YRT"}]},
+    {id:125,ag:'YRT', name:"Yonge St at Bernard Ave (Newmarket)",  lat:44.0523,lng:-79.4644,
+     routes:[{n:"1",   d:"Davis Dr / Newmarket",  t:"bus",ag:"YRT"},{n:"1",  d:"Richmond Hill Ctr",  t:"bus",ag:"YRT"}]},
 
-    // ─── DOWNTOWN TORONTO STREETCAR NETWORK CORE ───
-    { id:301, name:"Queen St W at University Ave (Osgoode Stn)", lat:43.6508, lng:-79.3879,
-      routes:[{n:"501", d:"Long Branch Loop",        t:"streetcar"},{n:"501",d:"Neville Park Loop",    t:"streetcar"}]},
-    { id:302, name:"King St W at Bay St", lat:43.6484, lng:-79.3817,
-      routes:[{n:"504", d:"Broadview Stn",           t:"streetcar"},{n:"504",d:"Dundas West Stn",      t:"streetcar"}]},
-    { id:303, name:"College St at Spadina Ave", lat:43.6596, lng:-79.4019,
-      routes:[{n:"506", d:"High Park Loop",          t:"streetcar"},{n:"510",d:"Union Station",        t:"streetcar"}]}
+    /* ── VIVA Rapid ── */
+    {id:201,ag:'VIVA',name:"Finch Bus Terminal – VIVA North",      lat:43.7801,lng:-79.4148,
+     routes:[{n:"vivaBlue",  d:"Newmarket GO",       t:"viva",vc:"rb-viva-blue",  ag:"VIVA"},
+             {n:"vivaOrange",d:"Hwy 7 / VMC",         t:"viva",vc:"rb-viva-orange",ag:"VIVA"}]},
+    {id:202,ag:'VIVA',name:"VIVA Hub – Hwy 7 at Yonge St",         lat:43.8441,lng:-79.4275,
+     routes:[{n:"vivaBlue",  d:"Newmarket GO",       t:"viva",vc:"rb-viva-blue",  ag:"VIVA"},
+             {n:"vivaBlue",  d:"Finch Terminal",      t:"viva",vc:"rb-viva-blue",  ag:"VIVA"},
+             {n:"vivaPurple",d:"Brampton GO",          t:"viva",vc:"rb-viva-purple",ag:"VIVA"}]},
+    {id:203,ag:'VIVA',name:"VIVA Stop – Hwy 7 at Leslie St",       lat:43.8302,lng:-79.3752,
+     routes:[{n:"vivaPurple",d:"Unionville GO",       t:"viva",vc:"rb-viva-purple",ag:"VIVA"},
+             {n:"vivaPurple",d:"Hwy 7 / Yonge",        t:"viva",vc:"rb-viva-purple",ag:"VIVA"}]},
+    {id:204,ag:'VIVA',name:"VIVA Stop – Hwy 7 at Warden",          lat:43.8313,lng:-79.3100,
+     routes:[{n:"vivaPurple",d:"Unionville GO",       t:"viva",vc:"rb-viva-purple",ag:"VIVA"},
+             {n:"vivaPurple",d:"Brampton",              t:"viva",vc:"rb-viva-purple",ag:"VIVA"}]},
+    {id:205,ag:'VIVA',name:"VIVA Stop – Yonge at Davis Dr",        lat:44.0455,lng:-79.4600,
+     routes:[{n:"vivaBlue",  d:"Finch Terminal",      t:"viva",vc:"rb-viva-blue",  ag:"VIVA"},
+             {n:"vivaBlue",  d:"Newmarket GO",         t:"viva",vc:"rb-viva-blue",  ag:"VIVA"}]},
+    {id:206,ag:'VIVA',name:"Bayview & Major Mackenzie – VIVA Pink",lat:43.8471,lng:-79.3955,
+     routes:[{n:"vivaPink",  d:"Aurora GO",            t:"viva",vc:"rb-viva-pink",  ag:"VIVA"},
+             {n:"vivaPink",  d:"Jefferson Bus Terminal",t:"viva",vc:"rb-viva-pink",  ag:"VIVA"}]},
+    {id:207,ag:'VIVA',name:"VIVA Stop – Hwy 7 at Don Mills Rd",    lat:43.8224,lng:-79.3564,
+     routes:[{n:"vivaPurple",d:"Unionville GO",        t:"viva",vc:"rb-viva-purple",ag:"VIVA"},
+             {n:"vivaOrange",d:"VMC Terminal",          t:"viva",vc:"rb-viva-orange",ag:"VIVA"}]},
+    {id:208,ag:'VIVA',name:"VIVA Stop – Hwy 7 at Jane St",         lat:43.7971,lng:-79.4947,
+     routes:[{n:"vivaOrange",d:"VMC Terminal",         t:"viva",vc:"rb-viva-orange",ag:"VIVA"},
+             {n:"vivaOrange",d:"Hwy 7 / Warden",        t:"viva",vc:"rb-viva-orange",ag:"VIVA"}]},
+    {id:209,ag:'VIVA',name:"Bernard Terminal – vivaBlue North",    lat:44.0455,lng:-79.4621,
+     routes:[{n:"vivaBlue",  d:"Finch Terminal",       t:"viva",vc:"rb-viva-blue",  ag:"VIVA"},
+             {n:"vivaPink",  d:"Aurora GO",             t:"viva",vc:"rb-viva-pink",  ag:"VIVA"}]},
+    {id:210,ag:'VIVA',name:"VIVA Stop – Hwy 7 at Bayview",         lat:43.8337,lng:-79.3946,
+     routes:[{n:"vivaPurple",d:"Unionville GO",        t:"viva",vc:"rb-viva-purple",ag:"VIVA"},
+             {n:"vivaOrange",d:"VMC Terminal",          t:"viva",vc:"rb-viva-orange",ag:"VIVA"}]},
 ];
 
-// ══════════════════════════════════════
-// Distance Calculations & Helpers
-// ══════════════════════════════════════
-function haversine(lat1, lng1, lat2, lng2) {
-    const R = 6371000, toRad = x => x * Math.PI / 180;
-    const dLat = toRad(lat2 - lat1), dLng = toRad(lng2 - lng1);
-    const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng/2)**2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-}
+// ══════════════════════════════════════════════════════
+// MAP  INIT
+// ══════════════════════════════════════════════════════
+const map = L.map('map',{ center:[43.7700,-79.4100], zoom:11 });
 
-function fmtDist(m) { return m < 1000 ? `${Math.round(m)} m` : `${(m/1000).toFixed(1)} km`; }
-function randomETA(min=1, max=15) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-
-function getNearby(lat, lng, radius=800) {
-    return STOPS.map(s => ({ ...s, dist: haversine(lat, lng, s.lat, s.lng) }))
-                .filter(s => s.dist <= radius)
-                .sort((a, b) => a.dist - b.dist);
-}
-
-function attachETAs(stops) {
-    return stops.map(s => ({
-        ...s,
-        routes: s.routes.map(r => {
-            const e1 = randomETA(1, 9);
-            const e2 = e1 + randomETA(6, 14);
-            return { ...r, eta1: e1, eta2: e2 };
-        })
-    }));
-}
-
-// ══════════════════════════════════════
-// Map & System Initial State
-// ══════════════════════════════════════
-let lastLat = null, lastLng = null, lastStops = [];
-let userMarker = null, radiusCircle = null, stopMarkers = [];
-
-// Setting map viewport center explicitly at CF Fairview Mall / Don Mills Station
-const map = L.map('map', { center: [43.7753, -79.3458], zoom: 15 });
-
-// CartoDB Voyager Tile layer representing Google Maps style
-L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '© OpenStreetMap contributors © CARTO',
-    subdomains: 'abcd',
-    maxZoom: 20
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom:19
 }).addTo(map);
 
-// Blue pin indicator representing selected map points
-const googleUserIcon = L.divIcon({
-    html: `<div style="width:16px; height:16px; background:#1a73e8; border:2.5px solid white; border-radius:50%; box-shadow:0 1px 4px rgba(0,0,0,0.4);"></div>`,
-    className: '', iconSize: [16, 16], iconAnchor: [8, 8]
+// ── Icons ──
+const userIcon = L.divIcon({
+    html:`<div style="width:16px;height:16px;background:#3b82f6;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 3px rgba(59,130,246,.3);"></div>`,
+    className:'', iconSize:[16,16], iconAnchor:[8,8]
 });
 
-function makeGoogleStopIcon(type) {
-    let color = '#da291c'; // Bus Red
-    if (type === 'express') color = '#137333'; // Express Green
-    if (type === 'streetcar') color = '#7b1fa2'; // Purple
+function mkStopIcon(ag){
+    const cfg={TTC:{bg:'#da291c',r:'7px',e:'🚌'},YRT:{bg:'#007a3d',r:'50%',e:'🚌'},VIVA:{bg:'#6b21a8',r:'50%',e:'⚡'}};
+    const c=cfg[ag]||cfg.TTC;
     return L.divIcon({
-        html: `<div style="width:24px; height:24px; background:${color}; border:2px solid white; border-radius:4px; display:flex; align-items:center; justify-content:center; color:white; font-size:11px; box-shadow:0 1px 3px rgba(0,0,0,0.3); font-weight:bold;">🚏</div>`,
-        className: '', iconSize: [24, 24], iconAnchor: [12, 12]
+        html:`<div style="width:24px;height:24px;background:${c.bg};border:2px solid #fff;border-radius:${c.r};display:flex;align-items:center;justify-content:center;font-size:11px;box-shadow:0 2px 6px rgba(0,0,0,.25);">${c.e}</div>`,
+        className:'', iconSize:[24,24], iconAnchor:[12,12]
     });
 }
 
-// ══════════════════════════════════════
-// Logic Event Listeners
-// ══════════════════════════════════════
-map.on('click', e => handleClick(e.latlng.lat, e.latlng.lng));
+// ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
+let curFilter='all', lastLat=null, lastLng=null, lastStops=[];
+let uMarker=null, rCircle=null, sMarkers=[];
+let sheetSt='normal'; // 'normal' | 'min' | 'full'
 
-function handleClick(lat, lng) {
-    lastLat = lat; lastLng = lng;
-
-    document.getElementById('mapHint').classList.add('hidden');
-    show('loadingState');
-    hide('welcomeState'); hide('stopsList'); hide('noResults');
-    document.getElementById('refreshBtn').style.display = 'none';
-    document.getElementById('locBar').style.display = 'none';
-
-    if (userMarker) map.removeLayer(userMarker);
-    userMarker = L.marker([lat, lng], { icon: googleUserIcon }).addTo(map);
-
-    stopMarkers.forEach(m => map.removeLayer(m)); stopMarkers = [];
-
-    if (radiusCircle) map.removeLayer(radiusCircle);
-    radiusCircle = L.circle([lat, lng], {
-        radius: 800, color: '#1a73e8', fillColor: '#1a73e8',
-        fillOpacity: 0.04, weight: 1.5, dashArray: '4 4'
-    }).addTo(map);
-
-    setTimeout(() => {
-        const nearby = getNearby(lat, lng);
-        lastStops = attachETAs(nearby);
-
-        lastStops.forEach(s => {
-            const primaryType = s.routes[0]?.t || 'bus';
-            const m = L.marker([s.lat, s.lng], { icon: makeGoogleStopIcon(primaryType) })
-                .addTo(map)
-                .bindPopup(`<b>${s.name}</b><br><small>${fmtDist(s.dist)} away</small>`);
-            stopMarkers.push(m);
-        });
-
-        renderUIStops(lastStops, lat, lng);
-    }, 300);
+// ══════════════════════════════════════════════════════
+// FILTER
+// ══════════════════════════════════════════════════════
+function setFilter(f, btn){
+    curFilter=f;
+    document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('act'));
+    btn.classList.add('act');
+    if(lastLat!==null) renderStops(lastStops, lastLat, lastLng);
 }
 
-function renderUIStops(stops, lat, lng) {
-    hide('loadingState');
-    document.getElementById('locText').textContent = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-    document.getElementById('locBar').style.display = 'flex';
+function applyFilter(stops){
+    if(curFilter==='all') return stops;
+    return stops.filter(s=>{
+        if(curFilter==='ttc')  return s.ag==='TTC';
+        if(curFilter==='yrt')  return s.ag==='YRT';
+        if(curFilter==='viva') return s.ag==='VIVA';
+        return true;
+    });
+}
 
-    if (stops.length === 0) {
-        document.getElementById('sidebarSub').textContent = 'No active lines near here';
-        show('noResults'); return;
+// ══════════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════════
+function haversine(a,b,c,d){
+    const R=6371000,r=x=>x*Math.PI/180;
+    const dL=r(c-a),dN=r(d-b);
+    const q=Math.sin(dL/2)**2+Math.cos(r(a))*Math.cos(r(c))*Math.sin(dN/2)**2;
+    return R*2*Math.atan2(Math.sqrt(q),Math.sqrt(1-q));
+}
+const fmtD = m => m<1000?`${Math.round(m)} m`:`${(m/1000).toFixed(1)} km`;
+const rETA = (mn,mx) => Math.floor(Math.random()*(mx-mn+1))+mn;
+const eCls = m => m<=2?'eta-now':m<=10?'eta-soon':'eta-later';
+const eLbl = m => m<=1?'Now':`${m} min`;
+
+function getNearby(lat,lng,r=800){
+    return STOPS.map(s=>({...s,dist:haversine(lat,lng,s.lat,s.lng)}))
+                .filter(s=>s.dist<=r)
+                .sort((a,b)=>a.dist-b.dist)
+                .slice(0,12);
+}
+
+function addETAs(stops){
+    return stops.map(s=>({...s, routes:s.routes.map(r=>{
+        const e=rETA(1,14); return{...r,eta1:e,eta2:e+rETA(5,20)};
+    })}));
+}
+
+function getRBadge(r){
+    if(r.t==='viva')   return r.vc||'rb-viva-blue';
+    if(r.ag==='YRT')   return 'rb-yrt';
+    if(r.t==='sc')     return 'rb-ttc-sc';
+    if(/X|E/.test(r.n)) return 'rb-ttc-ex';
+    return 'rb-ttc-bus';
+}
+
+function getTypeLabel(r){
+    if(r.t==='viva') return '⚡ VIVA Rapid';
+    if(r.t==='sc')   return '🚃 Streetcar · TTC';
+    if(r.ag==='YRT') return '🚌 YRT Bus';
+    return '🚌 TTC Bus';
+}
+
+// ══════════════════════════════════════════════════════
+// MAP  CLICK
+// ══════════════════════════════════════════════════════
+map.on('click', e => onClick(e.latlng.lat, e.latlng.lng));
+
+function onClick(lat,lng){
+    lastLat=lat; lastLng=lng;
+    document.getElementById('mapHint').classList.add('hidden');
+    setState('loading');
+    document.getElementById('refrBtn').style.display='none';
+    document.getElementById('locBar').style.display='none';
+    document.getElementById('statsRow').style.display='none';
+    document.getElementById('panelSub').textContent='Scanning nearby stops…';
+
+    // Clear layers
+    if(uMarker){ map.removeLayer(uMarker); }
+    sMarkers.forEach(m=>map.removeLayer(m)); sMarkers=[];
+    if(rCircle){ map.removeLayer(rCircle); }
+
+    uMarker=L.marker([lat,lng],{icon:userIcon}).addTo(map).bindPopup('<b>Your Location</b>').openPopup();
+    rCircle=L.circle([lat,lng],{radius:800,color:'#3b82f6',fillColor:'#3b82f6',fillOpacity:.05,weight:1.5,dashArray:'6 4'}).addTo(map);
+
+    // On mobile: expand sheet to normal
+    const p=document.getElementById('panel');
+    if(window.innerWidth<=768){
+        p.classList.remove('sh-min','sh-full');
+        sheetSt='normal';
+        document.getElementById('handleLbl').textContent='Drag up for more';
+        setTimeout(()=>map.invalidateSize(),320);
     }
 
-    const now = new Date();
-    const timestamp = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-    document.getElementById('sidebarSub').textContent = `Found ${stops.length} platform areas · Updated ${timestamp}`;
-    document.getElementById('refreshBtn').style.display = 'inline-block';
+    setTimeout(()=>{
+        const nearby=getNearby(lat,lng);
+        lastStops=addETAs(nearby);
+        nearby.forEach(s=>{
+            const m=L.marker([s.lat,s.lng],{icon:mkStopIcon(s.ag)}).addTo(map)
+                .bindPopup(`<b>${s.name}</b><br><small>${s.ag} · ${fmtD(s.dist)} away</small>`);
+            sMarkers.push(m);
+        });
+        renderStops(lastStops,lat,lng);
+    },600);
+}
 
-    const container = document.getElementById('stopsList');
-    container.innerHTML = stops.map(stop => {
-        const rows = stop.routes.map(r => {
-            let cls = 'eta-later';
-            if (r.eta1 <= 2) cls = 'eta-now';
-            else if (r.eta1 <= 6) cls = 'eta-soon';
+// ══════════════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════════════
+function renderStops(allStops,lat,lng){
+    const stops=applyFilter(allStops);
 
-            let modeText = 'Local Bus';
-            if (r.t === 'express') modeText = 'Express Bus';
-            if (r.t === 'streetcar') modeText = 'Streetcar';
+    document.getElementById('locTxt').textContent=`${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+    document.getElementById('locBar').style.display='flex';
 
-            return `
+    const ts=new Date().toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit',hour12:true});
+
+    // Stats
+    const ttcN=allStops.filter(s=>s.ag==='TTC').length;
+    const yrtN=allStops.filter(s=>s.ag==='YRT').length;
+    const vivaN=allStops.filter(s=>s.ag==='VIVA').length;
+    const sr=document.getElementById('statsRow');
+    sr.innerHTML=`
+        ${ttcN?`<div class="stat-chip ttc-c">🚌 ${ttcN} TTC</div>`:''}
+        ${yrtN?`<div class="stat-chip yrt-c">🟢 ${yrtN} YRT</div>`:''}
+        ${vivaN?`<div class="stat-chip viva-c">⚡ ${vivaN} VIVA</div>`:''}
+        <div style="margin-left:auto;font-size:10px;color:#a0aec0;white-space:nowrap">800 m radius</div>`;
+    sr.style.display='flex';
+
+    if(stops.length===0){
+        document.getElementById('panelSub').textContent='No stops with current filter';
+        setState('noRes'); return;
+    }
+
+    document.getElementById('panelSub').textContent=`${stops.length} stop${stops.length>1?'s':''} found · ${ts}`;
+    document.getElementById('refrBtn').style.display='inline-flex';
+
+    const html=stops.map((s,i)=>{
+        const agL=s.ag.toLowerCase();
+        const rowsHtml=s.routes.map(r=>`
             <div class="route-row">
-                <div class="route-num ${r.t}">${r.n}</div>
-                <div class="route-info">
-                    <div class="route-dest">${r.d}</div>
-                    <div class="route-meta">${modeText}</div>
+                <div class="rbadge ${getRBadge(r)}">${r.n}</div>
+                <div class="ri">
+                    <div class="r-dest">→ ${r.d}</div>
+                    <div class="r-type">${getTypeLabel(r)}</div>
                 </div>
                 <div class="eta-col">
-                    <div class="eta-chip ${cls}">${r.eta1 <= 1 ? 'Arriving' : `${r.eta1} min`}</div>
+                    <div class="eta-chip ${eCls(r.eta1)}">${eLbl(r.eta1)}</div>
                     <div class="eta-next">then ${r.eta2} min</div>
                 </div>
-            </div>`;
-        }).join('');
+            </div>`).join('');
 
-        return `
-        <div class="stop-card">
-            <div class="stop-head">
-                <div class="stop-ico">🚏</div>
-                <div>
-                    <div class="stop-name">${stop.name}</div>
-                    <div class="stop-dist">🚶 ${fmtDist(stop.dist)} away · ~${Math.round(stop.dist / 80)} min walk</div>
+        return `<div class="stop-card" style="animation-delay:${i*.06}s">
+            <div class="stop-hd">
+                <div class="sico ${agL}">${s.ag==='VIVA'?'⚡':'🚏'}</div>
+                <div style="flex:1;min-width:0">
+                    <div class="stop-name">${s.name}</div>
+                    <div class="stop-dist">🚶 ${fmtD(s.dist)} · ~${Math.round(s.dist/80)} min walk</div>
                 </div>
+                <div class="ag-badge ${agL}">${s.ag}</div>
             </div>
-            <div class="routes-wrap">${rows}</div>
+            ${rowsHtml}
         </div>`;
     }).join('');
 
-    show('stopsList');
+    document.getElementById('stopsList').innerHTML=html;
+    setState('results');
 }
 
-function refreshETAs() {
-    if (lastLat === null) return;
-    lastStops = attachETAs(lastStops);
-    renderUIStops(lastStops, lastLat, lastLng);
+function setState(s){
+    document.getElementById('stWelcome').style.display  = s==='welcome' ?'flex':'none';
+    document.getElementById('stLoading').style.display  = s==='loading' ?'flex':'none';
+    document.getElementById('stNoRes').style.display    = s==='noRes'   ?'flex':'none';
+    document.getElementById('stopsList').style.display  = s==='results' ?'block':'none';
 }
 
-// Automatic interval updating loop
-setInterval(() => { if (lastLat !== null) refreshETAs(); }, 45000);
+// ══════════════════════════════════════════════════════
+// REFRESH
+// ══════════════════════════════════════════════════════
+function refreshETAs(){
+    if(!lastLat) return;
+    lastStops=addETAs(lastStops);
+    renderStops(lastStops,lastLat,lastLng);
+}
+setInterval(()=>{ if(lastLat!==null) refreshETAs(); },60000);
 
-function show(id) { document.getElementById(id).style.display = 'flex'; }
-function hide(id) { document.getElementById(id).style.display = 'none'; }
+// ══════════════════════════════════════════════════════
+// MOBILE BOTTOM SHEET
+// ══════════════════════════════════════════════════════
+function toggleSheet(){
+    const p=document.getElementById('panel');
+    const lbl=document.getElementById('handleLbl');
+    if(sheetSt==='full'){
+        p.classList.remove('sh-full'); p.classList.add('sh-min');
+        sheetSt='min'; lbl.textContent='Tap to expand';
+    } else if(sheetSt==='min'){
+        p.classList.remove('sh-min'); p.style.height='';
+        sheetSt='normal'; lbl.textContent='Drag up for more';
+    } else {
+        p.classList.add('sh-full'); p.classList.remove('sh-min');
+        sheetSt='full'; lbl.textContent='Tap to minimise';
+    }
+    setTimeout(()=>map.invalidateSize(),320);
+}
+
+// Touch drag
+let ty0=0, th0=0;
+const panelEl=document.getElementById('panel');
+const handleEl=document.getElementById('panelHandle');
+
+handleEl.addEventListener('touchstart',e=>{
+    ty0=e.touches[0].clientY; th0=panelEl.offsetHeight;
+},{passive:true});
+
+handleEl.addEventListener('touchmove',e=>{
+    if(window.innerWidth>768) return;
+    const dY=ty0-e.touches[0].clientY;
+    const nh=Math.min(Math.max(th0+dY,52),window.innerHeight-60);
+    panelEl.style.height=nh+'px';
+    // prevent transition while dragging
+    panelEl.style.transition='none';
+},{passive:true});
+
+handleEl.addEventListener('touchend',()=>{
+    if(window.innerWidth>768) return;
+    panelEl.style.transition='';
+    const h=panelEl.offsetHeight, vh=window.innerHeight;
+    panelEl.style.height='';
+    const lbl=document.getElementById('handleLbl');
+    if(h<100){
+        panelEl.classList.add('sh-min'); panelEl.classList.remove('sh-full');
+        sheetSt='min'; lbl.textContent='Tap to expand';
+    } else if(h>vh*0.65){
+        panelEl.classList.add('sh-full'); panelEl.classList.remove('sh-min');
+        sheetSt='full'; lbl.textContent='Tap to minimise';
+    } else {
+        panelEl.classList.remove('sh-min','sh-full');
+        sheetSt='normal'; lbl.textContent='Drag up for more';
+    }
+    setTimeout(()=>map.invalidateSize(),320);
+},{passive:true});
+
+// Resize
+window.addEventListener('resize',()=>{
+    map.invalidateSize();
+    if(window.innerWidth>768){
+        panelEl.style.height='';
+        panelEl.classList.remove('sh-min','sh-full');
+    }
+});
+
+setTimeout(()=>map.invalidateSize(),200);
 </script>
 </body>
 </html>
